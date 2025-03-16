@@ -11,3 +11,90 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.fc {
+  margin: 10;
+  font-size: 14px;
+  color: black !important;
+}
+
+/* Ensure event title text is black */
+.fc-event-title, 
+.fc-event-time, 
+.fc-event {
+  color: black !important; /* Stronger selector */
+}
+
+/* Individual event styles */
+.pink-event {
+  background-color: pink !important;
+  color: black !important;
+  font-size: 12px !important;
+  padding: 1px 3px !important;
+}
+
+.yellow-event {
+  background-color: #ffe135 !important; /* Banana Yellow */
+  color: black !important;
+  font-size: 12px !important;
+  padding: 1px 3px !important;
+}
+
+.small-event {
+  background-color: red !important;
+  color: black !important; /* Force black */
+  font-size: 10px !important;
+  padding: 1px 2px !important;
+  height: 12px !important;
+  line-height: 1 !important;
+}
+
+/* Override any FullCalendar styles */
+.fc-daygrid-event, 
+.fc-timegrid-event, 
+.fc-timegrid-event .fc-event-title, 
+.fc-timegrid-event .fc-event-time, 
+.fc-event-main {
+  color: black !important;
+}
+
+/* Reduce event slot height */
+.fc-timegrid-slot {
+  height: 25px !important;
+}
+
+/* Ensure timegrid event text is black */
+.fc-timegrid-event {
+  min-height: 12px !important;
+  height: auto !important;
+  padding: 1px 3px !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  color: black !important;
+}
+.button-container {
+  position: absolute;
+  right: 150px;
+  top: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.save-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.save-btn:hover {
+  background-color: #0056b3;
+}
+
+.fc-toolbar-chunk {
+  display: flex;
+  align-items: center;
+}
