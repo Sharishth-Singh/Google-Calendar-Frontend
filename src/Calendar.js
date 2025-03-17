@@ -26,6 +26,9 @@ const formatTime = (date) => {
 
 const Calendar = () => {
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [responseMessage, setResponseMessage] = useState("");
+
 
   useEffect(() => {
     fetch("/events.txt")
@@ -100,6 +103,28 @@ const Calendar = () => {
     setEvents(updatedEvents);
   };
 
+  const handleEventResize = (resizeInfo) => {
+    const updatedEvents = events.map(event => {
+      if (event.id === resizeInfo.event.id) {
+        const start = resizeInfo.event.start;
+        const end = resizeInfo.event.end;
+        const duration = (end - start) / (1000 * 60);
+
+        return { 
+          ...event, 
+          start, 
+          end, 
+          title: `${formatTime(start)} - ${formatTime(end)} | ${event.id} (${Math.floor(duration / 60)}h ${duration % 60}m)`, 
+          extendedProps: { duration },
+          className: duration < 15 ? "small-event" : event.className 
+        };
+      }
+      return event;
+    });
+
+    setEvents(updatedEvents);
+  };
+
   const handleEventClick = (clickInfo) => {
     const newTitle = prompt("Edit event name:", clickInfo.event.title.split(" | ")[1].split(" (")[0]);
     if (newTitle) {
@@ -117,30 +142,65 @@ const Calendar = () => {
   };
 
   const saveEventsToFile = () => {
-    const formattedEvents = events
-.map(event => {
-  const duration = (event.end - event.start) / (1000 * 60);
-  return `${formatTime(event.start)} - ${formatTime(event.end)}= ${event.id} (${Math.floor(duration / 60)}h ${duration % 60}m)`;
-})
-      .join("\n");
+    setLoading(true);
 
-    const blob = new Blob([formattedEvents], { type: "text/plain" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "time.txt";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const timeSlots = events.map(event => {
+      const startTime = formatTime(event.start); 
+      const endTime = formatTime(event.end);  
+
+      const duration = (event.end - event.start) / (1000 * 60);
+      const hours = Math.floor(duration / 60);
+      const minutes = duration % 60;
+
+      const eventTitleWithDuration = `${event.id} (${hours}h ${minutes}m)`;
+
+      return `${startTime} - ${endTime} = ${eventTitleWithDuration}`;  
+    });
+
+    const payload = {
+      time_slots: timeSlots
+    };
+
+    fetch("http://localhost:8000/add-events/", {
+      method: "POST",  
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      setLoading(false);
+      setResponseMessage("Events saved successfully!");
+      console.log("Events saved successfully:", data);
+    })
+    .catch((error) => {
+      setLoading(false);
+      setResponseMessage("Error saving events. Please try again.");
+      console.error("Error saving events:", error);
+    });
   };
 
   return (
     <div className="calendar-container">
-      {/* Header with Today button and Save button */}
       <div className="button-container">
         <button onClick={saveEventsToFile} className="save-btn">
           Save Events
         </button>
       </div>
+
+      {loading && (
+        <div className="loading-screen">
+          <div className="spinner"></div>
+          <p>Saving events, please wait...</p>
+        </div>
+      )}
+
+      {responseMessage && (
+        <div className={`response-message ${responseMessage.includes('successfully') ? 'success' : 'error'}`}>
+          <p>{responseMessage}</p>
+        </div>
+      )}
 
       <FullCalendar 
         plugins={[timeGridPlugin, interactionPlugin]} 
@@ -150,7 +210,7 @@ const Calendar = () => {
         slotMaxTime="23:59:00"
         editable={true} 
         eventDrop={handleEventChange}
-        eventResize={handleEventChange}
+        eventResize={handleEventResize}  
         eventClick={handleEventClick}
         contentHeight="auto"
         height="800px"
