@@ -58,8 +58,8 @@ const Calendar = () => {
   useEffect(() => {
     if(viewMode === "Current Events"){
       setLoading(true); // Start loading before API call
-      // fetch("https://sharishth.pythonanywhere.com/get_events/")
-      fetch("http://localhost:8000/get_events/")
+      fetch("https://sharishth.pythonanywhere.com/get_events/")
+      // fetch("http://localhost:8000/get_events/")
         .then((res) => res.json())
         .then((data) => {
           setLoading(false); // Stop loading after response
@@ -285,8 +285,8 @@ const convertTo24Hour = (time) => {
     };
     console.log(payload);
 
-    // fetch("https://sharishth.pythonanywhere.com/add-events/", {
-    fetch("http://localhost:8000/add-events/",{
+    fetch("https://sharishth.pythonanywhere.com/add-events/", {
+    // fetch("http://localhost:8000/add-events/",{
       method: "POST",
       headers: {
         "Content-Type": "application/json"
