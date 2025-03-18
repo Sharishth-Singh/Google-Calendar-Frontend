@@ -58,7 +58,8 @@ const Calendar = () => {
   useEffect(() => {
     if(viewMode === "Current Events"){
       setLoading(true); // Start loading before API call
-      fetch("https://sharishth.pythonanywhere.com/get_events/")
+      // fetch("https://sharishth.pythonanywhere.com/get_events/")
+      fetch("http://localhost:8000/get_events/")
         .then((res) => res.json())
         .then((data) => {
           setLoading(false); // Stop loading after response
@@ -275,7 +276,7 @@ const convertTo24Hour = (time) => {
       const duration = (new Date(event.end) - new Date(event.start)) / (1000 * 60);
 
       // return `${startTime} - ${endTime} = ${event.id} (${formatDuration(duration)})`;
-      return `${startTime} - ${endTime} = ${event.id}`;
+      return `${startTime} - ${endTime} = ${cleanEventTitle(event.id)}`;
 
     });
 
@@ -284,7 +285,8 @@ const convertTo24Hour = (time) => {
     };
     console.log(payload);
 
-    fetch("https://sharishth.pythonanywhere.com/add-events/", {
+    // fetch("https://sharishth.pythonanywhere.com/add-events/", {
+    fetch("http://localhost:8000/add-events/",{
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -293,12 +295,12 @@ const convertTo24Hour = (time) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        setLoading(false);
+        setSavingEvent(false);
         setResponseMessage("Events saved successfully!");
         console.log("Events saved successfully:", data);
       })
       .catch((error) => {
-        setLoading(false);
+        setSavingEvent(false);
         setResponseMessage("Error saving events. Please try again.");
         console.error("Error saving events:", error);
       });
