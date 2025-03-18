@@ -175,3 +175,24 @@ code {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.navbar button {
+  padding: 8px 15px;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.navbar button.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
