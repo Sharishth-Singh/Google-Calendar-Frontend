@@ -316,11 +316,11 @@ const convertTo24Hour = (time) => {
             {mode}
           </button>
         ))}
-      </div>
       <div className="button-container">
         <button onClick={saveEventsToFile} className="save-btn">
           Save Events
         </button>
+      </div>
       </div>
 
       {savingEvent && (

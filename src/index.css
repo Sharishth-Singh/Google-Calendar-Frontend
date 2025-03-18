@@ -72,26 +72,44 @@ code {
   color: black !important;
 }
 .button-container {
-  position: absolute;
-  right: 150px;
-  top: 10px;
-  display: flex;
-  align-items: center;
+  /* position: absolute; */
+  /* right: 150px; */
+  /* top: 10px; */
+  /* display: flex; */
+  /* align-items: center;
+  background-color: black; */
+
+
+  /* padding: 8px 15px;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px; */
 }
 
 .save-btn {
-  background-color: #007bff;
+  /* background-color: #007bff;
   color: white;
   border: none;
   padding: 5px 10px;
   cursor: pointer;
   border-radius: 5px;
   font-size: 14px;
-  margin-left: 10px;
+  margin-left: 10px; */
+
+  padding: 8px 15px;
+  border: none;
+  background-color: #2C3E50 !important;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+  color: white !important;
 }
 
 .save-btn:hover {
-  background-color: #0056b3;
+  background-color: #de0f00 !important;
+  color: rgb(255, 255, 255) !important;
 }
 
 .fc-toolbar-chunk {
