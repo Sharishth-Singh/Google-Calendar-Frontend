@@ -27,8 +27,8 @@ const formatDuration = (minutes) => {
 // Function to clean event title (remove emojis and duration)
 const cleanEventTitle = (title) => {
   return title.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "") // Remove emojis
-              .replace(/\s*\(\d+\s*\w+\)\s*$/, "") // Remove (360 min) or similar at the end
-              .trim();
+    .replace(/\s*\(\d+\s*\w+\)\s*$/, "") // Remove (360 min) or similar at the end
+    .trim();
 };
 
 const Calendar = () => {
@@ -38,48 +38,48 @@ const Calendar = () => {
   const [responseMessage, setResponseMessage] = useState("");
 
   // Fetch events from API
-useEffect(() => {
-  setLoading(true); // Start loading before API call
-  fetch("https://sharishth.pythonanywhere.com/get_events/")
-    .then((res) => res.json())
-    .then((data) => {
-      setLoading(false); // Stop loading after response
-      if (data.status === "success" && Array.isArray(data.events)) {
-        const parsedEvents = data.events.map(event => {
-          const startDate = new Date(event.start);
-          const endDate = new Date(event.end);
-          const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
+  useEffect(() => {
+    setLoading(true); // Start loading before API call
+    fetch("https://sharishth.pythonanywhere.com/get_events/")
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false); // Stop loading after response
+        if (data.status === "success" && Array.isArray(data.events)) {
+          const parsedEvents = data.events.map(event => {
+            const startDate = new Date(event.start);
+            const endDate = new Date(event.end);
+            const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
 
-          const cleanedTitle = cleanEventTitle(event.title);
-          const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
+            const cleanedTitle = cleanEventTitle(event.title);
+            const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
 
-          const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
-            ? "pink-event"
-            : duration < 15
-            ? "small-event"
-            : "yellow-event";
+            const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
+              ? "pink-event"
+              : duration < 15
+                ? "small-event"
+                : "yellow-event";
 
-          return {
-            title: formattedTitle,
-            start: startDate,
-            end: endDate,
-            id: cleanedTitle.trim(),
-            extendedProps: { duration },
-            className: eventClass
-          };
-        });
-        setEvents(parsedEvents);
-        console.log(parsedEvents);
-        
-      } else {
-        console.error("Invalid API response format");
-      }
-    })
-    .catch((err) => {
-      setLoading(false); // Stop loading on error
-      console.error("Error fetching events:", err);
-    });
-}, []);
+            return {
+              title: formattedTitle,
+              start: startDate,
+              end: endDate,
+              id: cleanedTitle.trim(),
+              extendedProps: { duration },
+              className: eventClass
+            };
+          });
+          setEvents(parsedEvents);
+          console.log(parsedEvents);
+
+        } else {
+          console.error("Invalid API response format");
+        }
+      })
+      .catch((err) => {
+        setLoading(false); // Stop loading on error
+        console.error("Error fetching events:", err);
+      });
+  }, []);
 
 
   // Handle drag-and-drop event change
@@ -132,11 +132,11 @@ useEffect(() => {
     if (newTitle) {
       const updatedEvents = events.map(event =>
         event.id === clickInfo.event.id
-          ? { 
-              ...event, 
-              title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`, 
-              id: newTitle 
-            }
+          ? {
+            ...event,
+            title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`,
+            id: newTitle
+          }
           : event
       );
       setEvents(updatedEvents);
@@ -148,8 +148,8 @@ useEffect(() => {
     setSavingEvent(true);
 
     const timeSlots = events.map(event => {
-      const startTime = formatTime(event.start); 
-      const endTime = formatTime(event.end);  
+      const startTime = formatTime(event.start);
+      const endTime = formatTime(event.end);
       const duration = (new Date(event.end) - new Date(event.start)) / (1000 * 60);
 
       // return `${startTime} - ${endTime} = ${event.id} (${formatDuration(duration)})`;
@@ -161,25 +161,25 @@ useEffect(() => {
       time_slots: timeSlots
     };
     console.log(payload);
-    
+
     fetch("https://sharishth.pythonanywhere.com/add-events/", {
-      method: "POST",  
+      method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(payload)
     })
-    .then((response) => response.json())
-    .then((data) => {
-      setLoading(false);
-      setResponseMessage("Events saved successfully!");
-      console.log("Events saved successfully:", data);
-    })
-    .catch((error) => {
-      setLoading(false);
-      setResponseMessage("Error saving events. Please try again.");
-      console.error("Error saving events:", error);
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        setLoading(false);
+        setResponseMessage("Events saved successfully!");
+        console.log("Events saved successfully:", data);
+      })
+      .catch((error) => {
+        setLoading(false);
+        setResponseMessage("Error saving events. Please try again.");
+        console.error("Error saving events:", error);
+      });
   };
 
   return (
@@ -196,12 +196,12 @@ useEffect(() => {
           <p>Saving events, please wait...</p>
         </div>
       )}
-{loading && (
-  <div className="loading-screen">
-    <div className="spinner"></div>
-    <p>Loading events, please wait...</p>
-  </div>
-)}
+      {loading && (
+        <div className="loading-screen">
+          <div className="spinner"></div>
+          <p>Loading events, please wait...</p>
+        </div>
+      )}
 
       {responseMessage && (
         <div className={`response-message ${responseMessage.includes('successfully') ? 'success' : 'error'}`}>
@@ -209,15 +209,16 @@ useEffect(() => {
         </div>
       )}
 
-      <FullCalendar 
-        plugins={[timeGridPlugin, interactionPlugin]} 
+      <FullCalendar
+        plugins={[timeGridPlugin, interactionPlugin]}
+        initialDate={new Date(new Date().setDate(new Date().getDate() + 1))} // Set to tomorrow
         initialView="timeGridDay"
-        events={events} 
+        events={events}
         slotMinTime="00:00:00"
         slotMaxTime="23:59:00"
-        editable={true} 
+        editable={true}
         eventDrop={handleEventChange}
-        eventResize={handleEventResize}  
+        eventResize={handleEventResize}
         eventClick={handleEventClick}
         contentHeight="auto"
         height="800px"
