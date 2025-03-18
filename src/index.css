@@ -7,12 +7,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
 .fc {
-  margin: 10;
+  margin: 10px;
   font-size: 14px;
   color: black !important;
 }
@@ -21,7 +17,7 @@ code {
 .fc-event-title, 
 .fc-event-time, 
 .fc-event {
-  color: black !important; /* Stronger selector */
+  color: black !important;
 }
 
 /* Individual event styles */
@@ -29,94 +25,123 @@ code {
   background-color: pink !important;
   color: black !important;
   font-size: 12px !important;
-  padding: 1px 3px !important;
+  padding: 2px 5px !important;
 }
 
 .yellow-event {
   background-color: #ffe135 !important; /* Banana Yellow */
   color: black !important;
   font-size: 12px !important;
-  padding: 1px 3px !important;
+  padding: 2px 5px !important;
 }
 
 .small-event {
   background-color: red !important;
-  color: black !important; /* Force black */
+  color: black !important;
   font-size: 10px !important;
-  padding: 1px 2px !important;
-  height: 12px !important;
-  line-height: 1 !important;
+  padding: 1px 3px !important;
+  height: 14px !important;
+  line-height: 1.2 !important;
 }
 
-/* Override any FullCalendar styles */
+/* FullCalendar Event Text */
 .fc-daygrid-event, 
 .fc-timegrid-event, 
-.fc-timegrid-event .fc-event-title, 
-.fc-timegrid-event .fc-event-time, 
 .fc-event-main {
   color: black !important;
 }
 
-/* Reduce event slot height */
+/* Timegrid slot height */
 .fc-timegrid-slot {
   height: 25px !important;
 }
 
-/* Ensure timegrid event text is black */
+/* Timegrid event text styling */
 .fc-timegrid-event {
-  min-height: 12px !important;
+  min-height: 14px !important;
   height: auto !important;
-  padding: 1px 3px !important;
-  font-size: 11px !important;
-  line-height: 1.2 !important;
+  padding: 2px 5px !important;
+  font-size: 12px !important;
+  line-height: 1.3 !important;
   color: black !important;
 }
-.button-container {
-  /* position: absolute; */
-  /* right: 150px; */
-  /* top: 10px; */
-  /* display: flex; */
-  /* align-items: center;
-  background-color: black; */
 
+/* --- BUTTON FIXES --- */
 
-  /* padding: 8px 15px;
+/* General button styles */
+button {
+  padding: 8px 12px;
   border: none;
-  background-color: #eee;
-  cursor: pointer;
-  font-size: 16px;
-  border-radius: 5px; */
-}
-
-.save-btn {
-  /* background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
   border-radius: 5px;
   font-size: 14px;
-  margin-left: 10px; */
-
-  padding: 8px 15px;
-  border: none;
-  background-color: #2C3E50 !important;
   cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+/* Navbar buttons */
+.navbar {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.navbar button {
+  background-color: #eee;
+  font-size: 16px;
+}
+
+.navbar button.active,
+.navbar button:hover {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+/* Save Events Button */
+.save-btn {
+  display: flex;
+  position: absolute;
+  right: 10px;
+  padding: 10px 18px;
+  background-color: #2C3E50 !important;
+  color: white !important;
   font-size: 16px;
   border-radius: 5px;
-  color: white !important;
 }
 
 .save-btn:hover {
   background-color: #de0f00 !important;
-  color: rgb(255, 255, 255) !important;
 }
 
+/* Navigation Buttons */
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-buttons button {
+  padding: 6px 12px;
+  background-color: #ddd;
+  font-size: 14px;
+  border-radius: 5px;
+}
+
+.nav-buttons button:hover {
+  background-color: #ccc;
+}
+
+/* Toolbar Spacing */
 .fc-toolbar-chunk {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
-/* Loading screen */
+
+/* --- LOADING SCREEN --- */
 .loading-screen {
   position: fixed;
   top: 0;
@@ -127,18 +152,17 @@ code {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
   color: white;
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 20px;
+  z-index: 9999;
 }
 
 .spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top: 4px solid white;
   width: 40px;
   height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
@@ -147,7 +171,7 @@ code {
   100% { transform: rotate(360deg); }
 }
 
-/* Response message */
+/* Response messages */
 .response-message {
   margin-top: 20px;
   padding: 15px;
@@ -164,53 +188,4 @@ code {
 .response-message.error {
   background-color: #F44336;
   color: white;
-}
-.loading-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-size: 20px;
-  z-index: 9999;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(255, 255, 255, 0.3);
-  border-top: 5px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.navbar {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.navbar button {
-  padding: 8px 15px;
-  border: none;
-  background-color: #eee;
-  cursor: pointer;
-  font-size: 16px;
-  border-radius: 5px;
-}
-
-.navbar button.active {
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
 }

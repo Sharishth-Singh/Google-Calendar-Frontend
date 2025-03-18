@@ -316,13 +316,13 @@ const convertTo24Hour = (time) => {
             {mode}
           </button>
         ))}
+      </div>
+
       <div className="button-container">
         <button onClick={saveEventsToFile} className="save-btn">
           Save Events
         </button>
       </div>
-      </div>
-
       {savingEvent && (
         <div className="loading-screen">
           <div className="spinner"></div>
@@ -342,28 +342,41 @@ const convertTo24Hour = (time) => {
         </div>
       )}
 
-      <FullCalendar
-        plugins={[timeGridPlugin, interactionPlugin]}
-        initialDate={TimDate} // Set to tomorrow
-        initialView="timeGridDay"
-        events={events}
-        slotMinTime="00:00:00"
-        slotMaxTime="23:59:00"
-        editable={true}
-        eventDrop={handleEventChange}
-        eventResize={handleEventResize}
-        eventClick={handleEventClick}
-        contentHeight="auto"
-        height="800px"
-        snapDuration="00:15:00"
-        eventContent={(arg) => {
-          return (
-            <div style={{ fontSize: "14px" }}>
-              {arg.event.title}
-            </div>
-          );
-        }}
-      />
+<FullCalendar
+  plugins={[timeGridPlugin, interactionPlugin]}
+  initialDate={TimDate} // Set to tomorrow
+  initialView="timeGridDay"
+  events={events}
+  slotMinTime="00:00:00"
+  slotMaxTime="23:59:00"
+  editable={true}
+  eventDrop={handleEventChange}
+  eventResize={handleEventResize}
+  eventClick={handleEventClick}
+  contentHeight="auto"
+  height="800px"
+  snapDuration="00:15:00"
+  
+  /* ✅ Removed the "Today" button */
+  headerToolbar={{
+    left: 'title',  // Only previous & next buttons
+    center: '',
+    right: ''
+  }}
+
+  /* ✅ Improved event styling */
+  eventContent={(arg) => (
+    <div style={{
+      fontSize: "14px",
+      padding: "3px 6px",
+      // backgroundColor: arg.event.backgroundColor || "#f0f0f0", 
+      borderRadius: "4px"
+    }}>
+      {arg.event.title}
+    </div>
+  )}
+/>
+
     </div>
   );
 };
