@@ -10,92 +10,89 @@ const highlightWords = [
   "stop chasing", "study like", "5-minute rule", "bath", "sleep"
 ];
 
-const convertTo24Hour = (timeStr) => {
-  const [time, period] = timeStr.trim().split(" ");
-  let [hours, minutes] = time.split(":").map(Number);
-
-  if (period === "PM" && hours !== 12) hours += 12;
-  if (period === "AM" && hours === 12) hours = 0;
-
-  return { hours, minutes };
-};
-
+// Format time in HH:MM AM/PM format
 const formatTime = (date) => {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
 };
 
+// Format duration in HH:MM (e.g., "1h 30m")
+const formatDuration = (minutes) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours > 0 && mins > 0) return `${hours}h ${mins}m`;
+  if (hours > 0) return `${hours}h`;
+  return `${mins}m`;
+};
+
+// Function to clean event title (remove emojis and duration)
+const cleanEventTitle = (title) => {
+  return title.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "") // Remove emojis
+              .replace(/\s*\(\d+\s*\w+\)\s*$/, "") // Remove (360 min) or similar at the end
+              .trim();
+};
+
 const Calendar = () => {
   const [events, setEvents] = useState([]);
+  const [savingEvent, setSavingEvent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
 
+  // Fetch events from API
+useEffect(() => {
+  setLoading(true); // Start loading before API call
+  fetch("https://sharishth.pythonanywhere.com/get_events/")
+    .then((res) => res.json())
+    .then((data) => {
+      setLoading(false); // Stop loading after response
+      if (data.status === "success" && Array.isArray(data.events)) {
+        const parsedEvents = data.events.map(event => {
+          const startDate = new Date(event.start);
+          const endDate = new Date(event.end);
+          const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
 
-  useEffect(() => {
-    fetch("/events.txt")
-      .then((res) => res.text())
-      .then((data) => {
-        const parsedEvents = data
-          .split("\n")
-          .filter(line => line.includes("="))
-          .map(line => {
-            const [timeRange, title] = line.split("=");
-            const [startTime, endTime] = timeRange.trim().split(" - ");
+          const cleanedTitle = cleanEventTitle(event.title);
+          const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+          const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
+            ? "pink-event"
+            : duration < 15
+            ? "small-event"
+            : "yellow-event";
 
-            const { hours: startHour, minutes: startMinute } = convertTo24Hour(startTime);
-            const { hours: endHour, minutes: endMinute } = convertTo24Hour(endTime);
-
-            const startDateTime = new Date(today);
-            startDateTime.setHours(startHour, startMinute, 0, 0);
-
-            const endDateTime = new Date(today);
-            endDateTime.setHours(endHour, endMinute, 0, 0);
-
-            if (!isNaN(startDateTime) && !isNaN(endDateTime)) {
-              const duration = (endDateTime - startDateTime) / (1000 * 60); 
-              const eventClass = highlightWords.some(word => title.toLowerCase().includes(word))
-                ? "pink-event"
-                : duration < 15
-                ? "small-event"
-                : "yellow-event";
-
-              return { 
-                title: `${startTime} - ${endTime} | ${title.trim()} (${Math.floor(duration / 60)}h ${duration % 60}m)`, 
-                start: startDateTime, 
-                end: endDateTime, 
-                id: title.trim(),
-                extendedProps: { duration },
-                className: eventClass
-              };
-            } else {
-              console.error("Invalid date format in:", line);
-              return null;
-            }
-          })
-          .filter(event => event !== null);
-
+          return {
+            title: formattedTitle,
+            start: startDate,
+            end: endDate,
+            id: cleanedTitle.trim(),
+            extendedProps: { duration },
+            className: eventClass
+          };
+        });
         setEvents(parsedEvents);
-      })
-      .catch((err) => console.error("Error loading events:", err));
-  }, []);
+        console.log(parsedEvents);
+        
+      } else {
+        console.error("Invalid API response format");
+      }
+    })
+    .catch((err) => {
+      setLoading(false); // Stop loading on error
+      console.error("Error fetching events:", err);
+    });
+}, []);
 
+
+  // Handle drag-and-drop event change
   const handleEventChange = (eventChangeInfo) => {
     const updatedEvents = events.map(event => {
       if (event.id === eventChangeInfo.event.id) {
         const start = eventChangeInfo.event.start;
         const end = eventChangeInfo.event.end;
-        const duration = (end - start) / (1000 * 60);
+        const duration = Math.round((end - start) / (1000 * 60)); // Convert ms to minutes
 
-        return { 
-          ...event, 
-          start, 
-          end, 
-          title: `${formatTime(start)} - ${formatTime(end)} | ${event.id} (${Math.floor(duration / 60)}h ${duration % 60}m)`, 
-          extendedProps: { duration },
-          className: duration < 15 ? "small-event" : event.className 
-        };
+        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${event.id} (${formatDuration(duration)})`;
+
+        return { ...event, start, end, title: formattedTitle };
       }
       return event;
     });
@@ -103,21 +100,17 @@ const Calendar = () => {
     setEvents(updatedEvents);
   };
 
+  // Handle resizing of event duration
   const handleEventResize = (resizeInfo) => {
     const updatedEvents = events.map(event => {
       if (event.id === resizeInfo.event.id) {
         const start = resizeInfo.event.start;
         const end = resizeInfo.event.end;
-        const duration = (end - start) / (1000 * 60);
+        const duration = Math.round((end - start) / (1000 * 60));
 
-        return { 
-          ...event, 
-          start, 
-          end, 
-          title: `${formatTime(start)} - ${formatTime(end)} | ${event.id} (${Math.floor(duration / 60)}h ${duration % 60}m)`, 
-          extendedProps: { duration },
-          className: duration < 15 ? "small-event" : event.className 
-        };
+        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${event.id} (${formatDuration(duration)})`;
+
+        return { ...event, start, end, title: formattedTitle };
       }
       return event;
     });
@@ -125,43 +118,51 @@ const Calendar = () => {
     setEvents(updatedEvents);
   };
 
+  // Handle editing event name
   const handleEventClick = (clickInfo) => {
-    const newTitle = prompt("Edit event name:", clickInfo.event.title.split(" | ")[1].split(" (")[0]);
+    const eventParts = clickInfo.event.title.split(" | ");
+    const timeRange = eventParts[0];
+    const oldTitleWithDuration = eventParts[1];
+
+    // Extract event name (without duration)
+    const oldTitle = oldTitleWithDuration.replace(/\(\d+[mh]\)$/, "").trim();
+
+
+    const newTitle = prompt("Edit event name:", oldTitle);
     if (newTitle) {
-      const updatedEvents = events.map(event => 
-        event.id === clickInfo.event.id 
+      const updatedEvents = events.map(event =>
+        event.id === clickInfo.event.id
           ? { 
               ...event, 
-              title: `${formatTime(event.start)} - ${formatTime(event.end)} | ${newTitle} (${Math.floor((event.end - event.start) / 60000 / 60)}h ${(event.end - event.start) / 60000 % 60}m)`, 
+              title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`, 
               id: newTitle 
-            } 
+            }
           : event
       );
       setEvents(updatedEvents);
     }
   };
 
+  // Save updated events back to API
   const saveEventsToFile = () => {
-    setLoading(true);
+    setSavingEvent(true);
 
     const timeSlots = events.map(event => {
       const startTime = formatTime(event.start); 
       const endTime = formatTime(event.end);  
+      const duration = (new Date(event.end) - new Date(event.start)) / (1000 * 60);
 
-      const duration = (event.end - event.start) / (1000 * 60);
-      const hours = Math.floor(duration / 60);
-      const minutes = duration % 60;
+      // return `${startTime} - ${endTime} = ${event.id} (${formatDuration(duration)})`;
+      return `${startTime} - ${endTime} = ${event.id}`;
 
-      const eventTitleWithDuration = `${event.id} (${hours}h ${minutes}m)`;
-
-      return `${startTime} - ${endTime} = ${eventTitleWithDuration}`;  
     });
 
     const payload = {
       time_slots: timeSlots
     };
-
-    fetch("http://localhost:8000/add-events/", {
+    console.log(payload);
+    
+    fetch("https://sharishth.pythonanywhere.com/add-events/", {
       method: "POST",  
       headers: {
         "Content-Type": "application/json"
@@ -189,12 +190,18 @@ const Calendar = () => {
         </button>
       </div>
 
-      {loading && (
+      {savingEvent && (
         <div className="loading-screen">
           <div className="spinner"></div>
           <p>Saving events, please wait...</p>
         </div>
       )}
+{loading && (
+  <div className="loading-screen">
+    <div className="spinner"></div>
+    <p>Loading events, please wait...</p>
+  </div>
+)}
 
       {responseMessage && (
         <div className={`response-message ${responseMessage.includes('successfully') ? 'success' : 'error'}`}>
@@ -214,12 +221,12 @@ const Calendar = () => {
         eventClick={handleEventClick}
         contentHeight="auto"
         height="800px"
-        snapDuration="00:05:00"
+        snapDuration="00:15:00"
         eventContent={(arg) => {
-          const boxHeight = arg.event._def.ui.height;
-          const fontSize = boxHeight <= 15 ? "10px" : "14px";
           return (
-            <div style={{ fontSize }}>{arg.event.title}</div>
+            <div style={{ fontSize: "14px" }}>
+              {arg.event.title}
+            </div>
           );
         }}
       />
