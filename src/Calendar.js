@@ -85,11 +85,11 @@ const Calendar = () => {
     const eventId = clickInfo.event.id;
     const eventTitle = clickInfo.event.title;
 
-    // Show delete confirmation on right-click
     if (window.confirm(`Delete event: "${eventTitle}"?`)) {
-      setEvents(events.filter(event => event.id !== eventId));
+      setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
     }
   };
+
 
   const handleEventDoubleClick = (clickInfo) => {
     const eventId = clickInfo.event.id;
@@ -415,30 +415,30 @@ const Calendar = () => {
   };
 
 
-const updateFileContent = async () => {
-  try {
-    setSavingEvent(true);
-    const fileContent = events.map(event => {
-      const startTime = formatTime(event.start);
-      const endTime = formatTime(event.end);
-      const eventTitle = removeLastParentheses(cleanEventTitle(event.id));
-      return `${startTime} - ${endTime}= ${eventTitle}`;
-    }).join("\n");
-    // const response = await fetch("http://localhost:8000/update-file-content/", {
-    const response = await fetch("https://sharishth.pythonanywhere.com/update-file-content/", {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: fileContent
-    });
+  const updateFileContent = async () => {
+    try {
+      setSavingEvent(true);
+      const fileContent = events.map(event => {
+        const startTime = formatTime(event.start);
+        const endTime = formatTime(event.end);
+        const eventTitle = removeLastParentheses(cleanEventTitle(event.id));
+        return `${startTime} - ${endTime}= ${eventTitle}`;
+      }).join("\n");
+      // const response = await fetch("http://localhost:8000/update-file-content/", {
+      const response = await fetch("https://sharishth.pythonanywhere.com/update-file-content/", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: fileContent
+      });
 
-    setSavingEvent(false);
-    if (!response.ok) throw new Error("Failed to update file content");
-    setResponseMessage("Events saved successfully!");
-    setTimeout(() => setResponseMessage(""), 3000);
-  } catch (error) {
-    console.error("Error updating file content:", error);
-  }
-};
+      setSavingEvent(false);
+      if (!response.ok) throw new Error("Failed to update file content");
+      setResponseMessage("Events saved successfully!");
+      setTimeout(() => setResponseMessage(""), 3000);
+    } catch (error) {
+      console.error("Error updating file content:", error);
+    }
+  };
 
 
 
@@ -459,8 +459,9 @@ const updateFileContent = async () => {
     const payload = {
       time_slots: timeSlots
     };
+
     fetch("https://sharishth.pythonanywhere.com/add-events/", {
-      // fetch("http://localhost:8000/add-events/",{
+      // fetch("http://localhost:8000/add-events/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -480,7 +481,7 @@ const updateFileContent = async () => {
       });
   };
 
-        // <button onClick={saveEventsToFile} className="save-btn"></button>
+  // <button onClick={saveEventsToFile} className="save-btn"></button>
   return (
     <div className="calendar-container">
       <div className="navbar">
@@ -548,16 +549,39 @@ const updateFileContent = async () => {
         }}
 
         /* ✅ Improved event styling */
-        eventContent={(arg) => (
-          <div style={{
-            fontSize: "14px",
-            padding: "3px 6px",
-            // backgroundColor: arg.event.backgroundColor || "#f0f0f0", 
-            borderRadius: "4px"
-          }}>
-            {arg.event.title}
-          </div>
-        )}
+
+        eventContent={(arg) => {
+          // Regex to remove time range and "I " at the end
+          const cleanedTitle = arg.event.title.replace(/^\d{1,2}:\d{2} [APMapm]{2} - \d{1,2}:\d{2} [APMapm]{2} \|\s*/, "");
+
+          // Calculate duration in hours and minutes
+          const durationMs = arg.event.end.getTime() - arg.event.start.getTime();
+          const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+          const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+
+          // Format duration (remove `0h` if hours are 0)
+          let durationFormatted = "";
+          if (durationHours > 0) {
+            durationFormatted += `${durationHours}h`;
+          }
+          if (durationMinutes > 0) {
+            durationFormatted += ` ${durationMinutes}m`;
+          }
+          if (durationFormatted) {
+            durationFormatted = `(${durationFormatted.trim()})`;
+          }
+
+
+          return (
+            <div style={{
+              fontSize: "14px",
+              padding: "3px 6px",
+              borderRadius: "4px"
+            }}>
+              {arg.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {arg.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} | {cleanEventTitle(cleanedTitle)} {durationFormatted}
+            </div>
+          );
+        }}
         eventDidMount={(info) => {
           info.el.oncontextmenu = (e) => {  // Right-click to delete
             e.preventDefault();
