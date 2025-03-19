@@ -30,6 +30,10 @@ const formatDuration = (minutes) => {
   return `${mins}m`;
 };
 
+function removeLastParentheses(text) {
+    return text.replace(/\s*\([^()]*\)$/, ''); 
+}
+
 // Function to clean event title (remove emojis and duration)
 const cleanEventTitle = (title) => {
   return title
@@ -39,6 +43,9 @@ const cleanEventTitle = (title) => {
     .replace(/\s*\(\d+h\s*\d*m\)\s*$/, "") // Remove (1h 30m) or similar
     .trim();
 };
+
+
+
 
 function removeAfterFirstEmoji(text) {
     // Unicode regex for matching emojis (supports multi-codepoint emojis)
@@ -292,15 +299,13 @@ const convertTo24Hour = (time) => {
       const duration = (new Date(event.end) - new Date(event.start)) / (1000 * 60);
 
       // return `${startTime} - ${endTime} = ${event.id} (${formatDuration(duration)})`;
-      return `${startTime} - ${endTime} = ${cleanEventTitle(event.id)}`;
+      return `${startTime} - ${endTime} = ${removeLastParentheses(cleanEventTitle(event.id))}`;
 
     });
 
     const payload = {
       time_slots: timeSlots
-      
     };
-
     fetch("https://sharishth.pythonanywhere.com/add-events/", {
     // fetch("http://localhost:8000/add-events/",{
       method: "POST",
