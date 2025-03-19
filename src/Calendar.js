@@ -78,6 +78,69 @@ const Calendar = () => {
   const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend"];
 
 
+
+const handleEventDelete = (clickInfo) => {
+  const eventId = clickInfo.event.id;
+  const eventTitle = clickInfo.event.title;
+
+  // Show delete confirmation on right-click
+  if (window.confirm(`Delete event: "${eventTitle}"?`)) {
+    setEvents(events.filter(event => event.id !== eventId));
+  }
+};
+
+const handleEventDoubleClick = (clickInfo) => {
+  const eventId = clickInfo.event.id;
+  const eventParts = clickInfo.event.title.split(" | ");
+  const timeRange = eventParts[0];
+  const oldTitleWithDuration = eventParts[1];
+
+  // Extract event name (without duration)
+  const oldTitle = cleanEventTitle(oldTitleWithDuration);
+
+  // Create an input box
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = oldTitle;
+  input.style.width = "100%";
+  input.style.border = "none";
+  input.style.fontSize = "14px";
+  input.style.padding = "3px";
+  input.style.outline = "none";
+
+  // Replace event text with input
+  clickInfo.el.innerHTML = "";
+  clickInfo.el.appendChild(input);
+  input.focus();
+
+  // Save new title when user presses "Enter" or clicks outside
+  const saveNewTitle = () => {
+    const newTitle = input.value.trim();
+    if (newTitle) {
+      const updatedEvents = events.map(event =>
+        event.id === eventId
+          ? {
+              ...event,
+              title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`,
+              id: `${newTitle}-${clickInfo.event.start.getTime()}`,
+              className: getEventClass(newTitle, event.extendedProps.duration)
+            }
+          : event
+      );
+      setEvents(updatedEvents);
+    }
+  };
+
+  input.addEventListener("blur", saveNewTitle);
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      saveNewTitle();
+      input.blur();
+    }
+  });
+};
+
+
   // Function to handle new event creation
   const handleDateSelect = (selectInfo) => {
     const start = selectInfo.start;
@@ -310,6 +373,9 @@ const Calendar = () => {
     }
   };
 
+
+
+
   // Save updated events back to API
   const saveEventsToFile = () => {
     setSavingEvent(true);
@@ -396,7 +462,8 @@ const Calendar = () => {
         editable={true}
         eventDrop={handleEventChange}
         eventResize={handleEventResize}
-        eventClick={handleEventClick}
+        // eventClick={[handleEventClick, handleEventDelete]}
+        eventClick={[handleEventClick]}
         contentHeight="auto"
         selectable={true}  // ✅ Allow time slot selection
         select={handleDateSelect} // ✅ Trigger new event creation on selection
@@ -421,6 +488,13 @@ const Calendar = () => {
             {arg.event.title}
           </div>
         )}
+  eventDidMount={(info) => {
+    info.el.oncontextmenu = (e) => {  // Right-click to delete
+      e.preventDefault(); 
+      handleEventDelete(info);
+    };
+  }}
+
       />
 
     </div>
