@@ -237,7 +237,7 @@ const convertTo24Hour = (time) => {
         const end = eventChangeInfo.event.end;
         const duration = Math.round((end - start) / (1000 * 60)); // Convert ms to minutes
 
-        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${cleanEventTitle(event.id)} (${formatDuration(duration)})`;
+        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${removeLastParentheses(cleanEventTitle(event.id))} (${formatDuration(duration)})`;
 
         return { ...event, start, end, title: formattedTitle , className: getEventClass(event.id, duration)};
       }
@@ -255,7 +255,7 @@ const convertTo24Hour = (time) => {
         const end = resizeInfo.event.end;
         const duration = Math.round((end - start) / (1000 * 60));
 
-        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${cleanEventTitle(event.id)} (${formatDuration(duration)})`;
+        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${removeLastParentheses(cleanEventTitle(event.id))} (${formatDuration(duration)})`;
 
         return { ...event, start, end, title: formattedTitle , className: getEventClass(event.id, duration)};
       }
