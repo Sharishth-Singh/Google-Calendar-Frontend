@@ -31,7 +31,7 @@ const formatDuration = (minutes) => {
 };
 
 function removeLastParentheses(text) {
-    return text.replace(/\s*\([^()]*\)$/, ''); 
+  return text.replace(/\s*\([^()]*\)$/, '');
 }
 
 // Function to clean event title (remove emojis and duration)
@@ -48,22 +48,22 @@ const cleanEventTitle = (title) => {
 
 
 function removeAfterFirstEmoji(text) {
-    // Unicode regex for matching emojis (supports multi-codepoint emojis)
-    const emojiRegex = /(\p{Extended_Pictographic}|\p{Emoji_Presentation})+/gu;
+  // Unicode regex for matching emojis (supports multi-codepoint emojis)
+  const emojiRegex = /(\p{Extended_Pictographic}|\p{Emoji_Presentation})+/gu;
 
-    // Find the first emoji match
-    let match = emojiRegex.exec(text);
+  // Find the first emoji match
+  let match = emojiRegex.exec(text);
 
-    // If no emoji is found, return the original text
-    if (!match) {
-        return text;
-    }
+  // If no emoji is found, return the original text
+  if (!match) {
+    return text;
+  }
 
-    // Get the index of the first emoji
-    let firstEmojiIndex = match.index;
+  // Get the index of the first emoji
+  let firstEmojiIndex = match.index;
 
-    // Remove everything from and after the first emoji
-    return text.slice(0, firstEmojiIndex);
+  // Remove everything from and after the first emoji
+  return text.slice(0, firstEmojiIndex);
 }
 
 let TimDate = new Date(new Date().setDate(new Date().getDate() + 1))
@@ -73,19 +73,40 @@ const Calendar = () => {
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
   const [viewMode, setViewMode] = useState("Current Events"); // Default view mode
-  
-  
+
+
   const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend"];
 
 
+  // Function to handle new event creation
+  const handleDateSelect = (selectInfo) => {
+    const start = selectInfo.start;
+    const end = selectInfo.end;
+    const eventName = prompt("Enter event name:");
+
+    if (eventName) {
+      const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
+      const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${eventName} (${duration}m)`;
+
+      const newEvent = {
+        id: `${eventName}-${start.getTime()}`,
+        title: formattedTitle,
+        start,
+        end,
+        className: "yellow-event",
+      };
+
+      setEvents([...events, newEvent]); // Add new event to state
+    }
+  };
 
 
   // Fetch events from API
   useEffect(() => {
-    if(viewMode === "Current Events"){
+    if (viewMode === "Current Events") {
       setLoading(true); // Start loading before API call
       fetch("https://sharishth.pythonanywhere.com/get_events/")
-      // fetch("http://localhost:8000/get_events/")
+        // fetch("http://localhost:8000/get_events/")
         .then((res) => res.json())
         .then((data) => {
           setLoading(false); // Stop loading after response
@@ -124,101 +145,101 @@ const Calendar = () => {
           setLoading(false); // Stop loading on error
           console.error("Error fetching events:", err);
         });
-  } else {
-    // Load from file
-    const fileMap = {
-      "Normal Day": "normalday.txt",
-      "Extra Class Day": "extraclassday.txt",
-      "Weekend": "weekend.txt"
-    };
+    } else {
+      // Load from file
+      const fileMap = {
+        "Normal Day": "normalday.txt",
+        "Extra Class Day": "extraclassday.txt",
+        "Weekend": "weekend.txt"
+      };
 
-    const selectedFile = fileMap[viewMode];
-    if (selectedFile) {
-      loadEventsFromFile(selectedFile);
+      const selectedFile = fileMap[viewMode];
+      if (selectedFile) {
+        loadEventsFromFile(selectedFile);
+      }
     }
-  }
-}, [viewMode]);
+  }, [viewMode]);
 
 
-const loadEventsFromFile = (fileName) => {
-  setLoading(true); // Start loading
+  const loadEventsFromFile = (fileName) => {
+    setLoading(true); // Start loading
 
-  fetch(fileName)
-    .then(response => response.text())
-    .then(text => {
-      setLoading(false); // Stop loading after response
+    fetch(fileName)
+      .then(response => response.text())
+      .then(text => {
+        setLoading(false); // Stop loading after response
 
-      const parsedEvents = text
-        .split("\n")
-        .map(line => line.trim()) // Trim spaces
-        .filter(line => line.includes("=")) // Ensure valid format
-        .map(line => {
-          const parts = line.split("=");
-          if (parts.length < 2) return null; // Skip malformed lines
+        const parsedEvents = text
+          .split("\n")
+          .map(line => line.trim()) // Trim spaces
+          .filter(line => line.includes("=")) // Ensure valid format
+          .map(line => {
+            const parts = line.split("=");
+            if (parts.length < 2) return null; // Skip malformed lines
 
-          const timeRange = parts[0].trim().replace(/\s+/g, " "); // Clean spaces
-          const cleanedTitle = cleanEventTitle(parts[1].trim()); // Remove extra text
+            const timeRange = parts[0].trim().replace(/\s+/g, " "); // Clean spaces
+            const cleanedTitle = cleanEventTitle(parts[1].trim()); // Remove extra text
 
-          const timeParts = timeRange.split(" - ");
-          if (timeParts.length < 2) return null; // Skip incorrect time formats
+            const timeParts = timeRange.split(" - ");
+            if (timeParts.length < 2) return null; // Skip incorrect time formats
 
-          // Convert time to Date objects (Assuming events are on the same day)
-          const currentDate = TimDate.toLocaleDateString("en-CA"); // Get today's date
-          const startDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[0].trim())}`);
-          const endDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[1].trim())}`);
-          const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
-          
-          if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-            console.error("Invalid date conversion:", { timeRange, startDate, endDate });
-            return null;
-          }
+            // Convert time to Date objects (Assuming events are on the same day)
+            const currentDate = TimDate.toLocaleDateString("en-CA"); // Get today's date
+            const startDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[0].trim())}`);
+            const endDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[1].trim())}`);
+            const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
 
-          const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+              console.error("Invalid date conversion:", { timeRange, startDate, endDate });
+              return null;
+            }
 
-          const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
-            ? "pink-event"
-            : duration < 15
-              ? "small-event"
-              : "yellow-event";
+            const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
 
-          return {
-            title: formattedTitle,
-            start: startDate,
-            end: endDate,
-            id: `${cleanedTitle}-${startDate.getTime()}`, // Unique ID fix
-            extendedProps: { duration },
-            className: eventClass
-          };
-        })
-        .filter(event => event !== null); // Remove null values
+            const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
+              ? "pink-event"
+              : duration < 15
+                ? "small-event"
+                : "yellow-event";
 
-      setEvents([]); // Reset first to force re-render
-      setTimeout(() => setEvents(parsedEvents), 0); // Ensure state update
-    })
-    .catch(err => {
-      setLoading(false); // Stop loading on error
-      console.error("Error loading file:", err);
-    });
-};
+            return {
+              title: formattedTitle,
+              start: startDate,
+              end: endDate,
+              id: `${cleanedTitle}-${startDate.getTime()}`, // Unique ID fix
+              extendedProps: { duration },
+              className: eventClass
+            };
+          })
+          .filter(event => event !== null); // Remove null values
+
+        setEvents([]); // Reset first to force re-render
+        setTimeout(() => setEvents(parsedEvents), 0); // Ensure state update
+      })
+      .catch(err => {
+        setLoading(false); // Stop loading on error
+        console.error("Error loading file:", err);
+      });
+  };
 
 
 
-const convertTo24Hour = (time) => {
-  const match = time.match(/(\d{1,2}):(\d{2})\s?(AM|PM)/i);
-  if (!match) {
-    console.error("Invalid time format:", time);
-    return "00:00:00"; // Default fallback time to prevent crashes
-  }
+  const convertTo24Hour = (time) => {
+    const match = time.match(/(\d{1,2}):(\d{2})\s?(AM|PM)/i);
+    if (!match) {
+      console.error("Invalid time format:", time);
+      return "00:00:00"; // Default fallback time to prevent crashes
+    }
 
-  let [_, hour, minute, period] = match;
-  hour = parseInt(hour, 10);
-  minute = parseInt(minute, 10);
+    let [_, hour, minute, period] = match;
+    hour = parseInt(hour, 10);
+    minute = parseInt(minute, 10);
 
-  if (period.toLowerCase() === "pm" && hour !== 12) hour += 12;
-  if (period.toLowerCase() === "am" && hour === 12) hour = 0;
+    if (period.toLowerCase() === "pm" && hour !== 12) hour += 12;
+    if (period.toLowerCase() === "am" && hour === 12) hour = 0;
 
-  return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}:00`;
-};
+    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}:00`;
+  };
 
 
   const filteredEvents = events.filter(event => {
@@ -239,7 +260,7 @@ const convertTo24Hour = (time) => {
 
         const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${removeLastParentheses(cleanEventTitle(event.id))} (${formatDuration(duration)})`;
 
-        return { ...event, start, end, title: formattedTitle , className: getEventClass(event.id, duration)};
+        return { ...event, start, end, title: formattedTitle, className: getEventClass(event.id, duration) };
       }
       return event;
     });
@@ -257,7 +278,7 @@ const convertTo24Hour = (time) => {
 
         const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${removeLastParentheses(cleanEventTitle(event.id))} (${formatDuration(duration)})`;
 
-        return { ...event, start, end, title: formattedTitle , className: getEventClass(event.id, duration)};
+        return { ...event, start, end, title: formattedTitle, className: getEventClass(event.id, duration) };
       }
       return event;
     });
@@ -307,7 +328,7 @@ const convertTo24Hour = (time) => {
       time_slots: timeSlots
     };
     fetch("https://sharishth.pythonanywhere.com/add-events/", {
-    // fetch("http://localhost:8000/add-events/",{
+      // fetch("http://localhost:8000/add-events/",{
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -365,40 +386,42 @@ const convertTo24Hour = (time) => {
         </div>
       )}
 
-<FullCalendar
-  plugins={[timeGridPlugin, interactionPlugin]}
-  initialDate={TimDate} // Set to tomorrow
-  initialView="timeGridDay"
-  events={events}
-  slotMinTime="00:00:00"
-  slotMaxTime="23:59:00"
-  editable={true}
-  eventDrop={handleEventChange}
-  eventResize={handleEventResize}
-  eventClick={handleEventClick}
-  contentHeight="auto"
-  height="800px"
-  snapDuration="00:15:00"
-  
-  /* ✅ Removed the "Today" button */
-  headerToolbar={{
-    left: 'title',  // Only previous & next buttons
-    center: '',
-    right: ''
-  }}
+      <FullCalendar
+        plugins={[timeGridPlugin, interactionPlugin]}
+        initialDate={TimDate} // Set to tomorrow
+        initialView="timeGridDay"
+        events={events}
+        slotMinTime="00:00:00"
+        slotMaxTime="23:59:00"
+        editable={true}
+        eventDrop={handleEventChange}
+        eventResize={handleEventResize}
+        eventClick={handleEventClick}
+        contentHeight="auto"
+        selectable={true}  // ✅ Allow time slot selection
+        select={handleDateSelect} // ✅ Trigger new event creation on selection
+        height="800px"
+        snapDuration="00:15:00"
 
-  /* ✅ Improved event styling */
-  eventContent={(arg) => (
-    <div style={{
-      fontSize: "14px",
-      padding: "3px 6px",
-      // backgroundColor: arg.event.backgroundColor || "#f0f0f0", 
-      borderRadius: "4px"
-    }}>
-      {arg.event.title}
-    </div>
-  )}
-/>
+        /* ✅ Removed the "Today" button */
+        headerToolbar={{
+          left: 'title',  // Only previous & next buttons
+          center: '',
+          right: ''
+        }}
+
+        /* ✅ Improved event styling */
+        eventContent={(arg) => (
+          <div style={{
+            fontSize: "14px",
+            padding: "3px 6px",
+            // backgroundColor: arg.event.backgroundColor || "#f0f0f0", 
+            borderRadius: "4px"
+          }}>
+            {arg.event.title}
+          </div>
+        )}
+      />
 
     </div>
   );
