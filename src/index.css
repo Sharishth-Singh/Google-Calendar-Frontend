@@ -99,21 +99,49 @@ button {
   font-weight: bold;
 }
 
-/* Save Events Button */
-.save-btn {
+/* --- BUTTON CONTAINER --- */
+.button-container {
   display: flex;
+  justify-content: flex-end; /* Aligns content to the right */
+  gap: 10px;
   position: absolute;
   right: 10px;
+  top: 67px;
+}
+
+
+/* --- SAVE BUTTON --- */
+.save-btn {
   padding: 10px 18px;
-  background-color: #2C3E50 !important;
+  background-color: #2C3E50 !important; /* Dark blue */
   color: white !important;
   font-size: 16px;
+  border: none;
   border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
 }
 
 .save-btn:hover {
-  background-color: #de0f00 !important;
+  background-color:  #007bff !important; /* Red on hover */
 }
+
+/* --- COPY BUTTON --- */
+.copy-btn {
+  padding: 10px 18px;
+  background-color: #3498db !important; /* Blue */
+  color: white !important;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.copy-btn:hover {
+  background-color:  #007bff !important; /* Darker blue on hover */
+}
+
 
 /* Navigation Buttons */
 .nav-buttons {

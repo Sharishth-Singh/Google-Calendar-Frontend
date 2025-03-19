@@ -3,6 +3,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import "./index.css"; // Import CSS file
+import { set } from "date-fns";
 
 const highlightWords = [
   "break", "dinner", "good morning", "your journey", "lunch", "relaxation",
@@ -75,70 +76,71 @@ const Calendar = () => {
   const [viewMode, setViewMode] = useState("Current Events"); // Default view mode
 
 
-  const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend"];
+  const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend", "Saved to File"];
 
 
 
-const handleEventDelete = (clickInfo) => {
-  const eventId = clickInfo.event.id;
-  const eventTitle = clickInfo.event.title;
 
-  // Show delete confirmation on right-click
-  if (window.confirm(`Delete event: "${eventTitle}"?`)) {
-    setEvents(events.filter(event => event.id !== eventId));
-  }
-};
+  const handleEventDelete = (clickInfo) => {
+    const eventId = clickInfo.event.id;
+    const eventTitle = clickInfo.event.title;
 
-const handleEventDoubleClick = (clickInfo) => {
-  const eventId = clickInfo.event.id;
-  const eventParts = clickInfo.event.title.split(" | ");
-  const timeRange = eventParts[0];
-  const oldTitleWithDuration = eventParts[1];
+    // Show delete confirmation on right-click
+    if (window.confirm(`Delete event: "${eventTitle}"?`)) {
+      setEvents(events.filter(event => event.id !== eventId));
+    }
+  };
 
-  // Extract event name (without duration)
-  const oldTitle = cleanEventTitle(oldTitleWithDuration);
+  const handleEventDoubleClick = (clickInfo) => {
+    const eventId = clickInfo.event.id;
+    const eventParts = clickInfo.event.title.split(" | ");
+    const timeRange = eventParts[0];
+    const oldTitleWithDuration = eventParts[1];
 
-  // Create an input box
-  const input = document.createElement("input");
-  input.type = "text";
-  input.value = oldTitle;
-  input.style.width = "100%";
-  input.style.border = "none";
-  input.style.fontSize = "14px";
-  input.style.padding = "3px";
-  input.style.outline = "none";
+    // Extract event name (without duration)
+    const oldTitle = cleanEventTitle(oldTitleWithDuration);
 
-  // Replace event text with input
-  clickInfo.el.innerHTML = "";
-  clickInfo.el.appendChild(input);
-  input.focus();
+    // Create an input box
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = oldTitle;
+    input.style.width = "100%";
+    input.style.border = "none";
+    input.style.fontSize = "14px";
+    input.style.padding = "3px";
+    input.style.outline = "none";
 
-  // Save new title when user presses "Enter" or clicks outside
-  const saveNewTitle = () => {
-    const newTitle = input.value.trim();
-    if (newTitle) {
-      const updatedEvents = events.map(event =>
-        event.id === eventId
-          ? {
+    // Replace event text with input
+    clickInfo.el.innerHTML = "";
+    clickInfo.el.appendChild(input);
+    input.focus();
+
+    // Save new title when user presses "Enter" or clicks outside
+    const saveNewTitle = () => {
+      const newTitle = input.value.trim();
+      if (newTitle) {
+        const updatedEvents = events.map(event =>
+          event.id === eventId
+            ? {
               ...event,
               title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`,
               id: `${newTitle}-${clickInfo.event.start.getTime()}`,
               className: getEventClass(newTitle, event.extendedProps.duration)
             }
-          : event
-      );
-      setEvents(updatedEvents);
-    }
-  };
+            : event
+        );
+        setEvents(updatedEvents);
+      }
+    };
 
-  input.addEventListener("blur", saveNewTitle);
-  input.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      saveNewTitle();
-      input.blur();
-    }
-  });
-};
+    input.addEventListener("blur", saveNewTitle);
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        saveNewTitle();
+        input.blur();
+      }
+    });
+  };
 
 
   // Function to handle new event creation
@@ -213,77 +215,116 @@ const handleEventDoubleClick = (clickInfo) => {
       const fileMap = {
         "Normal Day": "normalday.txt",
         "Extra Class Day": "extraclassday.txt",
-        "Weekend": "weekend.txt"
+        "Weekend": "weekend.txt",
+        "Saved to File": fetchFileContent
       };
 
       const selectedFile = fileMap[viewMode];
-      if (selectedFile) {
-        loadEventsFromFile(selectedFile);
+      if (viewMode === "Saved to File") {
+        fetchFileContentFromApi()
+      } else {
+        if (selectedFile) {
+          loadEventsFromFile(selectedFile);
+        }
       }
     }
   }, [viewMode]);
 
 
-  const loadEventsFromFile = (fileName) => {
-    setLoading(true); // Start loading
-
-    fetch(fileName)
-      .then(response => response.text())
-      .then(text => {
-        setLoading(false); // Stop loading after response
-
-        const parsedEvents = text
-          .split("\n")
-          .map(line => line.trim()) // Trim spaces
-          .filter(line => line.includes("=")) // Ensure valid format
-          .map(line => {
-            const parts = line.split("=");
-            if (parts.length < 2) return null; // Skip malformed lines
-
-            const timeRange = parts[0].trim().replace(/\s+/g, " "); // Clean spaces
-            const cleanedTitle = cleanEventTitle(parts[1].trim()); // Remove extra text
-
-            const timeParts = timeRange.split(" - ");
-            if (timeParts.length < 2) return null; // Skip incorrect time formats
-
-            // Convert time to Date objects (Assuming events are on the same day)
-            const currentDate = TimDate.toLocaleDateString("en-CA"); // Get today's date
-            const startDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[0].trim())}`);
-            const endDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[1].trim())}`);
-            const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
-
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-              console.error("Invalid date conversion:", { timeRange, startDate, endDate });
-              return null;
-            }
-
-            const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
-
-            const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
-              ? "pink-event"
-              : duration < 15
-                ? "small-event"
-                : "yellow-event";
-
-            return {
-              title: formattedTitle,
-              start: startDate,
-              end: endDate,
-              id: `${cleanedTitle}-${startDate.getTime()}`, // Unique ID fix
-              extendedProps: { duration },
-              className: eventClass
-            };
-          })
-          .filter(event => event !== null); // Remove null values
-
-        setEvents([]); // Reset first to force re-render
-        setTimeout(() => setEvents(parsedEvents), 0); // Ensure state update
+  const fetchFileContentFromApi = () => {
+    setLoading(true); // Start loading before API call
+    // return fetch("http://localhost:8000/get-file-content/")
+    return fetch("https://sharishth.pythonanywhere.com/get-file-content/")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch file content");
+        return res.text();
       })
-      .catch(err => {
-        setLoading(false); // Stop loading on error
-        console.error("Error loading file:", err);
+      .then((text) => {
+        processEvents(text);
+        setLoading(false); // Stop loading after response
+      })
+      .catch((err) => {
+        console.error("Error fetching file content:", err);
+        return null;
       });
   };
+
+
+
+  const fetchFileContent = async (fileName) => {
+    try {
+      const response = await fetch(fileName);
+      return await response.text();
+    } catch (error) {
+      console.error("Error fetching file:", error);
+      return null;
+    }
+  };
+
+  const processEvents = (fileContent) => {
+    if (!fileContent) {
+      setEvents([]); // Reset if no content
+      return;
+    }
+
+    const parsedEvents = fileContent
+      .split("\n")
+      .map(line => line.trim()) // Trim spaces
+      .filter(line => line.includes("=")) // Ensure valid format
+      .map(line => {
+        const parts = line.split("=");
+        if (parts.length < 2) return null; // Skip malformed lines
+
+        const timeRange = parts[0].trim().replace(/\s+/g, " "); // Clean spaces
+        const cleanedTitle = cleanEventTitle(parts[1].trim()); // Remove extra text
+
+        const timeParts = timeRange.split(" - ");
+        if (timeParts.length < 2) return null; // Skip incorrect time formats
+
+        // Convert time to Date objects (Assuming events are on the same day)
+        const currentDate = TimDate.toLocaleDateString("en-CA"); // Get today's date
+        const startDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[0].trim())}`);
+        const endDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[1].trim())}`);
+        const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
+
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          console.error("Invalid date conversion:", { timeRange, startDate, endDate });
+          return null;
+        }
+
+        const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
+
+        const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
+          ? "pink-event"
+          : duration < 15
+            ? "small-event"
+            : "yellow-event";
+
+        return {
+          title: formattedTitle,
+          start: startDate,
+          end: endDate,
+          id: `${cleanedTitle}-${startDate.getTime()}`, // Unique ID fix
+          extendedProps: { duration },
+          className: eventClass
+        };
+      })
+      .filter(event => event !== null); // Remove null values
+
+    // Reset state before updating
+    setEvents([]);
+    setTimeout(() => setEvents(parsedEvents), 0);
+  };
+
+  const loadEventsFromFile = async (fileName) => {
+    setLoading(true); // Start loading
+
+    const fileContent = await fetchFileContent(fileName);
+    processEvents(fileContent);
+
+    setLoading(false); // Stop loading
+  };
+
 
 
 
@@ -374,6 +415,31 @@ const handleEventDoubleClick = (clickInfo) => {
   };
 
 
+const updateFileContent = async () => {
+  try {
+    setSavingEvent(true);
+    const fileContent = events.map(event => {
+      const startTime = formatTime(event.start);
+      const endTime = formatTime(event.end);
+      const eventTitle = removeLastParentheses(cleanEventTitle(event.id));
+      return `${startTime} - ${endTime}= ${eventTitle}`;
+    }).join("\n");
+    // const response = await fetch("http://localhost:8000/update-file-content/", {
+    const response = await fetch("https://sharishth.pythonanywhere.com/update-file-content/", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: fileContent
+    });
+
+    setSavingEvent(false);
+    if (!response.ok) throw new Error("Failed to update file content");
+    setResponseMessage("Events saved successfully!");
+    setTimeout(() => setResponseMessage(""), 3000);
+  } catch (error) {
+    console.error("Error updating file content:", error);
+  }
+};
+
 
 
   // Save updated events back to API
@@ -405,7 +471,7 @@ const handleEventDoubleClick = (clickInfo) => {
       .then((data) => {
         setSavingEvent(false);
         setResponseMessage("Events saved successfully!");
-        console.log("Events saved successfully:", data);
+        setTimeout(() => setResponseMessage(""), 3000);
       })
       .catch((error) => {
         setSavingEvent(false);
@@ -414,6 +480,7 @@ const handleEventDoubleClick = (clickInfo) => {
       });
   };
 
+        // <button onClick={saveEventsToFile} className="save-btn"></button>
   return (
     <div className="calendar-container">
       <div className="navbar">
@@ -429,6 +496,9 @@ const handleEventDoubleClick = (clickInfo) => {
       </div>
 
       <div className="button-container">
+        <button onClick={updateFileContent} className="copy-btn">
+          Copy Events
+        </button>
         <button onClick={saveEventsToFile} className="save-btn">
           Save Events
         </button>
@@ -488,12 +558,12 @@ const handleEventDoubleClick = (clickInfo) => {
             {arg.event.title}
           </div>
         )}
-  eventDidMount={(info) => {
-    info.el.oncontextmenu = (e) => {  // Right-click to delete
-      e.preventDefault(); 
-      handleEventDelete(info);
-    };
-  }}
+        eventDidMount={(info) => {
+          info.el.oncontextmenu = (e) => {  // Right-click to delete
+            e.preventDefault();
+            handleEventDelete(info);
+          };
+        }}
 
       />
 
