@@ -40,6 +40,25 @@ const cleanEventTitle = (title) => {
     .trim();
 };
 
+function removeAfterFirstEmoji(text) {
+    // Unicode regex for matching emojis (supports multi-codepoint emojis)
+    const emojiRegex = /(\p{Extended_Pictographic}|\p{Emoji_Presentation})+/gu;
+
+    // Find the first emoji match
+    let match = emojiRegex.exec(text);
+
+    // If no emoji is found, return the original text
+    if (!match) {
+        return text;
+    }
+
+    // Get the index of the first emoji
+    let firstEmojiIndex = match.index;
+
+    // Remove everything from and after the first emoji
+    return text.slice(0, firstEmojiIndex);
+}
+
 let TimDate = new Date(new Date().setDate(new Date().getDate() + 1))
 const Calendar = () => {
   const [events, setEvents] = useState([]);
@@ -69,7 +88,8 @@ const Calendar = () => {
               const endDate = new Date(event.end);
               const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
 
-              const cleanedTitle = cleanEventTitle(event.title);
+              // const cleanedTitle = cleanEventTitle(event.title);
+              const cleanedTitle = removeAfterFirstEmoji(event.title);
               const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
               const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
                 ? "pink-event"
@@ -86,7 +106,6 @@ const Calendar = () => {
                 className: eventClass
               };
             });
-            console.log(parsedEvents);
             TimDate = parsedEvents[0].start
             setEvents(parsedEvents);
 
@@ -121,7 +140,6 @@ const loadEventsFromFile = (fileName) => {
     .then(response => response.text())
     .then(text => {
       setLoading(false); // Stop loading after response
-      console.log("Raw text data:", text); // Debugging
 
       const parsedEvents = text
         .split("\n")
@@ -142,7 +160,6 @@ const loadEventsFromFile = (fileName) => {
           const startDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[0].trim())}`);
           const endDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[1].trim())}`);
           const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
-          console.log(TimDate, currentDate);
           
           if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
             console.error("Invalid date conversion:", { timeRange, startDate, endDate });
@@ -168,7 +185,6 @@ const loadEventsFromFile = (fileName) => {
         })
         .filter(event => event !== null); // Remove null values
 
-      console.log("Parsed events from file:", parsedEvents); // Debugging
       setEvents([]); // Reset first to force re-render
       setTimeout(() => setEvents(parsedEvents), 0); // Ensure state update
     })
@@ -282,8 +298,8 @@ const convertTo24Hour = (time) => {
 
     const payload = {
       time_slots: timeSlots
+      
     };
-    console.log(payload);
 
     fetch("https://sharishth.pythonanywhere.com/add-events/", {
     // fetch("http://localhost:8000/add-events/",{
