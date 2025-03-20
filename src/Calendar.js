@@ -398,146 +398,168 @@ const Calendar = () => {
     setEvents(updatedEvents);
   };
 
-  const handleEventClick = (clickInfo) => {
-    const eventId = clickInfo.event.id;
-    const eventParts = clickInfo.event.title.split(" | ");
-    const timeRange = eventParts[0];
-    const oldTitleWithDuration = eventParts[1];
+const handleEventClick = (clickInfo) => {
+  const eventId = clickInfo.event.id;
+  const eventParts = clickInfo.event.title.split(" | ");
+  const timeRange = eventParts[0];
+  const oldTitleWithDuration = eventParts[1];
 
-    // Extract event name (without duration)
-    const oldTitle = cleanEventTitle(oldTitleWithDuration);
+  // Extract event name (without duration)
+  const oldTitle = cleanEventTitle(oldTitleWithDuration);
 
-    // Prevent multiple popups
-    if (document.getElementById("event-edit-popup")) return;
+  // Prevent multiple popups
+  if (document.getElementById("event-edit-popup")) return;
 
-    // Create dark background overlay
-    const overlay = document.createElement("div");
-    overlay.id = "popup-overlay";
-    Object.assign(overlay.style, {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      background: "rgba(0, 0, 0, 0.5)",
-      zIndex: 999,
-    });
+  // Create dark background overlay
+  const overlay = document.createElement("div");
+  overlay.id = "popup-overlay";
+  Object.assign(overlay.style, {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    background: "rgba(0, 0, 0, 0.5)",
+    zIndex: 999,
+  });
 
-    // Create popup container
-    const popup = document.createElement("div");
-    popup.id = "event-edit-popup";
-    Object.assign(popup.style, {
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      background: "white",
-      padding: "20px",
-      width: "350px",
-      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-      borderRadius: "8px",
-      zIndex: 1000,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-    });
+  // Create popup container
+  const popup = document.createElement("div");
+  popup.id = "event-edit-popup";
+  Object.assign(popup.style, {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    background: "white",
+    width: "90%", // Responsive width
+    height: "350px",
+    maxWidth: "400px",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    borderRadius: "8px",
+    zIndex: 1000,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  });
 
-    // Create title
-    const title = document.createElement("h3");
-    title.innerText = "Edit Event Name";
-    Object.assign(title.style, {
-      marginBottom: "10px",
-    });
+  // Create title
+  const title = document.createElement("h3");
+  title.innerText = "Edit Event Name";
+  Object.assign(title.style, {
+    marginBottom: "10px",
+    textAlign: "center", // Center text for better mobile view
+  });
 
-    // Create textarea field
-    const textarea = document.createElement("textarea");
-    textarea.value = oldTitle;
-    Object.assign(textarea.style, {
-      fontSize: "16px",
-      padding: "10px",
-      border: "1px solid #ccc",
-      borderRadius: "5px",
-      width: "100%",
-      height: "80px",  // Bigger textarea
-      resize: "none", // Disable resizing
-    });
+  // Create textarea field
+  const textarea = document.createElement("textarea");
+  textarea.value = oldTitle;
+  Object.assign(textarea.style, {
+    fontSize: "16px",
+    padding: "10px",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    width: "100%",
+    height: "90%",
+    resize: "none",
+  });
 
-    // Create button container
-    const buttonContainer = document.createElement("div");
-    Object.assign(buttonContainer.style, {
-      marginTop: "15px",
-      display: "flex",
-      justifyContent: "space-around",
-      width: "100%",
-    });
+  // Create button container
+  const buttonContainer = document.createElement("div");
+  Object.assign(buttonContainer.style, {
+    marginTop: "15px",
+    display: "flex",
+    justifyContent: "space-around",
+    width: "100%",
+  });
 
-    // Create "✔" (Save) button
-    const saveButton = document.createElement("button");
-    saveButton.innerHTML = "✔ Save";
-    Object.assign(saveButton.style, {
-      background: "#4CAF50",
-      color: "white",
-      border: "none",
-      cursor: "pointer",
-      fontSize: "14px",
-      padding: "8px 15px",
-      borderRadius: "5px",
-    });
+  // Create "✔" (Save) button
+  const saveButton = document.createElement("button");
+  saveButton.innerHTML = "✔ Save";
+  Object.assign(saveButton.style, {
+    background: "#4CAF50",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "14px",
+    padding: "8px 15px",
+    borderRadius: "5px",
+  });
 
-    // Create "✖" (Cancel) button
-    const cancelButton = document.createElement("button");
-    cancelButton.innerHTML = "✖ Cancel";
-    Object.assign(cancelButton.style, {
-      background: "#f44336",
-      color: "white",
-      border: "none",
-      cursor: "pointer",
-      fontSize: "14px",
-      padding: "8px 15px",
-      borderRadius: "5px",
-    });
+  // Create "✖" (Cancel) button
+  const cancelButton = document.createElement("button");
+  cancelButton.innerHTML = "✖ Cancel";
+  Object.assign(cancelButton.style, {
+    background: "#f44336",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "14px",
+    padding: "8px 15px",
+    borderRadius: "5px",
+  });
 
-    // Function to save or cancel changes
-    const saveChanges = () => {
-      const newTitle = textarea.value.trim();
-      if (newTitle) {
-        setEvents((prevEvents) =>
-          prevEvents.map(event =>
-            event.id === eventId
-              ? {
+  // Adjust popup size on small screens
+  const adjustPopupSize = () => {
+    if (window.innerWidth < 500) {
+      popup.style.width = "90%";
+      popup.style.padding = "20px";
+    } else {
+      popup.style.width = "400px";
+      popup.style.padding = "40px";
+    }
+  };
+
+  window.addEventListener("resize", adjustPopupSize);
+  adjustPopupSize(); // Initial call
+
+  // Function to save or cancel changes
+  const saveChanges = () => {
+    const newTitle = textarea.value.trim();
+    if (newTitle) {
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? {
                 ...event,
                 title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`,
                 className: getEventClass(newTitle, event.extendedProps.duration),
               }
-              : event
-          )
-        );
+            : event
+        )
+      );
 
-        clickInfo.event.setProp("title", `${timeRange} | ${newTitle} (${formatDuration(clickInfo.event.extendedProps.duration)})`);
-      }
-      document.body.removeChild(popup);
-      document.body.removeChild(overlay);
-    };
-
-    const cancelChanges = () => {
-      document.body.removeChild(popup);
-      document.body.removeChild(overlay);
-    };
-
-    // Event listeners
-    saveButton.addEventListener("click", saveChanges);
-    cancelButton.addEventListener("click", cancelChanges);
-
-    // Append elements
-    buttonContainer.appendChild(saveButton);
-    buttonContainer.appendChild(cancelButton);
-    popup.appendChild(title);
-    popup.appendChild(textarea);
-    popup.appendChild(buttonContainer);
-    document.body.appendChild(overlay);
-    document.body.appendChild(popup);
-    textarea.focus();
+      clickInfo.event.setProp(
+        "title",
+        `${timeRange} | ${newTitle} (${formatDuration(clickInfo.event.extendedProps.duration)})`
+      );
+    }
+    document.body.removeChild(popup);
+    document.body.removeChild(overlay);
+    window.removeEventListener("resize", adjustPopupSize);
   };
+
+  const cancelChanges = () => {
+    document.body.removeChild(popup);
+    document.body.removeChild(overlay);
+    window.removeEventListener("resize", adjustPopupSize);
+  };
+
+  // Event listeners
+  saveButton.addEventListener("click", saveChanges);
+  cancelButton.addEventListener("click", cancelChanges);
+
+  // Append elements
+  buttonContainer.appendChild(saveButton);
+  buttonContainer.appendChild(cancelButton);
+  popup.appendChild(title);
+  popup.appendChild(textarea);
+  popup.appendChild(buttonContainer);
+  document.body.appendChild(overlay);
+  document.body.appendChild(popup);
+  textarea.focus();
+};
+
 
 
 
