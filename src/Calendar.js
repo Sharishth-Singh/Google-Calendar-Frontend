@@ -100,40 +100,46 @@ const Calendar = () => {
     // Extract event name (without duration)
     const oldTitle = cleanEventTitle(oldTitleWithDuration);
 
-    // Create an input box
+    // Create input box
     const input = document.createElement("input");
     input.type = "text";
     input.value = oldTitle;
-    input.style.width = "100%";
-    input.style.border = "none";
-    input.style.fontSize = "14px";
-    input.style.padding = "3px";
-    input.style.outline = "none";
+    Object.assign(input.style, {
+      width: "100%",
+      border: "none",
+      fontSize: "14px",
+      padding: "3px",
+      outline: "none"
+    });
 
     // Replace event text with input
     clickInfo.el.innerHTML = "";
     clickInfo.el.appendChild(input);
     input.focus();
 
-    // Save new title when user presses "Enter" or clicks outside
+    // Save new title when user presses "Enter" or loses focus
     const saveNewTitle = () => {
       const newTitle = input.value.trim();
       if (newTitle) {
-        const updatedEvents = events.map(event =>
-          event.id === eventId
-            ? {
-              ...event,
-              title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`,
-              id: `${newTitle}-${clickInfo.event.start.getTime()}`,
-              className: getEventClass(newTitle, event.extendedProps.duration)
-            }
-            : event
+        setEvents((prevEvents) =>
+          prevEvents.map(event =>
+            event.id === eventId
+              ? {
+                ...event,
+                title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`,
+                className: getEventClass(newTitle, event.extendedProps.duration)
+              }
+              : event
+          )
         );
-        setEvents(updatedEvents);
       }
     };
 
-    input.addEventListener("blur", saveNewTitle);
+    input.addEventListener("blur", () => {
+      saveNewTitle();
+      clickInfo.event.setProp("title", `${timeRange} | ${input.value.trim()} (${formatDuration(clickInfo.event.extendedProps.duration)})`);
+    });
+
     input.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
         saveNewTitle();
@@ -141,6 +147,8 @@ const Calendar = () => {
       }
     });
   };
+
+
 
 
   // Function to handle new event creation
@@ -390,29 +398,149 @@ const Calendar = () => {
     setEvents(updatedEvents);
   };
 
-  // Handle editing event name
   const handleEventClick = (clickInfo) => {
+    const eventId = clickInfo.event.id;
     const eventParts = clickInfo.event.title.split(" | ");
     const timeRange = eventParts[0];
     const oldTitleWithDuration = eventParts[1];
 
     // Extract event name (without duration)
-    const oldTitle = cleanEventTitle(oldTitleWithDuration)
-    const newTitle = prompt("Edit event name:", oldTitle);
-    if (newTitle) {
-      const updatedEvents = events.map(event =>
-        event.id === clickInfo.event.id
-          ? {
-            ...event,
-            title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`,
-            id: `${newTitle}-${clickInfo.event.start.getTime()}`,
-            className: getEventClass(newTitle, event.extendedProps.duration)
-          }
-          : event
-      );
-      setEvents(updatedEvents);
-    }
+    const oldTitle = cleanEventTitle(oldTitleWithDuration);
+
+    // Prevent multiple popups
+    if (document.getElementById("event-edit-popup")) return;
+
+    // Create dark background overlay
+    const overlay = document.createElement("div");
+    overlay.id = "popup-overlay";
+    Object.assign(overlay.style, {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(0, 0, 0, 0.5)",
+      zIndex: 999,
+    });
+
+    // Create popup container
+    const popup = document.createElement("div");
+    popup.id = "event-edit-popup";
+    Object.assign(popup.style, {
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      background: "white",
+      padding: "20px",
+      width: "350px",
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+      borderRadius: "8px",
+      zIndex: 1000,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    });
+
+    // Create title
+    const title = document.createElement("h3");
+    title.innerText = "Edit Event Name";
+    Object.assign(title.style, {
+      marginBottom: "10px",
+    });
+
+    // Create textarea field
+    const textarea = document.createElement("textarea");
+    textarea.value = oldTitle;
+    Object.assign(textarea.style, {
+      fontSize: "16px",
+      padding: "10px",
+      border: "1px solid #ccc",
+      borderRadius: "5px",
+      width: "100%",
+      height: "80px",  // Bigger textarea
+      resize: "none", // Disable resizing
+    });
+
+    // Create button container
+    const buttonContainer = document.createElement("div");
+    Object.assign(buttonContainer.style, {
+      marginTop: "15px",
+      display: "flex",
+      justifyContent: "space-around",
+      width: "100%",
+    });
+
+    // Create "✔" (Save) button
+    const saveButton = document.createElement("button");
+    saveButton.innerHTML = "✔ Save";
+    Object.assign(saveButton.style, {
+      background: "#4CAF50",
+      color: "white",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "14px",
+      padding: "8px 15px",
+      borderRadius: "5px",
+    });
+
+    // Create "✖" (Cancel) button
+    const cancelButton = document.createElement("button");
+    cancelButton.innerHTML = "✖ Cancel";
+    Object.assign(cancelButton.style, {
+      background: "#f44336",
+      color: "white",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "14px",
+      padding: "8px 15px",
+      borderRadius: "5px",
+    });
+
+    // Function to save or cancel changes
+    const saveChanges = () => {
+      const newTitle = textarea.value.trim();
+      if (newTitle) {
+        setEvents((prevEvents) =>
+          prevEvents.map(event =>
+            event.id === eventId
+              ? {
+                ...event,
+                title: `${timeRange} | ${newTitle} (${formatDuration(event.extendedProps.duration)})`,
+                className: getEventClass(newTitle, event.extendedProps.duration),
+              }
+              : event
+          )
+        );
+
+        clickInfo.event.setProp("title", `${timeRange} | ${newTitle} (${formatDuration(clickInfo.event.extendedProps.duration)})`);
+      }
+      document.body.removeChild(popup);
+      document.body.removeChild(overlay);
+    };
+
+    const cancelChanges = () => {
+      document.body.removeChild(popup);
+      document.body.removeChild(overlay);
+    };
+
+    // Event listeners
+    saveButton.addEventListener("click", saveChanges);
+    cancelButton.addEventListener("click", cancelChanges);
+
+    // Append elements
+    buttonContainer.appendChild(saveButton);
+    buttonContainer.appendChild(cancelButton);
+    popup.appendChild(title);
+    popup.appendChild(textarea);
+    popup.appendChild(buttonContainer);
+    document.body.appendChild(overlay);
+    document.body.appendChild(popup);
+    textarea.focus();
   };
+
+
+
 
 
   const updateFileContent = async () => {
@@ -481,29 +609,37 @@ const Calendar = () => {
       });
   };
 
-  // <button onClick={saveEventsToFile} className="save-btn"></button>
   return (
     <div className="calendar-container">
+      {/* Navigation Bar */}
       <div className="navbar">
         {viewModes.map(mode => (
           <button
             key={mode}
-            className={viewMode === mode ? "active" : ""}
+            className={`nav-btn ${viewMode === mode ? "active" : ""}`}
+            data-short={mode === "Current Events" ? "CE" :
+              mode === "Normal Day" ? "ND" :
+                mode === "Extra Class Day" ? "ED" :
+                  mode === "Weekend" ? "We" :
+                    mode === "Saved to File" ? "File" : mode}
             onClick={() => setViewMode(mode)}
           >
-            {mode}
+            <span>{mode}</span>
           </button>
         ))}
       </div>
 
+      {/* Button Container */}
       <div className="button-container">
-        <button onClick={updateFileContent} className="copy-btn">
-          Copy Events
+        <button onClick={updateFileContent} className="copy-btn" data-short="Copy">
+          <span>Copy Events</span>
         </button>
-        <button onClick={saveEventsToFile} className="save-btn">
-          Save Events
+        <button onClick={saveEventsToFile} className="save-btn" data-short="Save">
+          <span>Save Events</span>
         </button>
       </div>
+
+      {/* Loading Screens */}
       {savingEvent && (
         <div className="loading-screen">
           <div className="spinner"></div>
@@ -517,15 +653,17 @@ const Calendar = () => {
         </div>
       )}
 
+      {/* Response Message */}
       {responseMessage && (
         <div className={`response-message ${responseMessage.includes('successfully') ? 'success' : 'error'}`}>
           <p>{responseMessage}</p>
         </div>
       )}
 
+      {/* FullCalendar Component */}
       <FullCalendar
         plugins={[timeGridPlugin, interactionPlugin]}
-        initialDate={TimDate} // Set to tomorrow
+        initialDate={TimDate}
         initialView="timeGridDay"
         events={events}
         slotMinTime="00:00:00"
@@ -533,44 +671,31 @@ const Calendar = () => {
         editable={true}
         eventDrop={handleEventChange}
         eventResize={handleEventResize}
-        // eventClick={[handleEventClick, handleEventDelete]}
-        eventClick={[handleEventClick]}
+        eventClick={handleEventClick}
         contentHeight="auto"
-        selectable={true}  // ✅ Allow time slot selection
-        select={handleDateSelect} // ✅ Trigger new event creation on selection
+        selectable={true}
+        select={handleDateSelect}
         height="800px"
         snapDuration="00:15:00"
 
-        /* ✅ Removed the "Today" button */
+        /* Hide "Today" button */
         headerToolbar={{
-          left: 'title',  // Only previous & next buttons
+          left: 'title',
           center: '',
           right: ''
         }}
 
-        /* ✅ Improved event styling */
-
+        /* Custom event content */
         eventContent={(arg) => {
-          // Regex to remove time range and "I " at the end
           const cleanedTitle = arg.event.title.replace(/^\d{1,2}:\d{2} [APMapm]{2} - \d{1,2}:\d{2} [APMapm]{2} \|\s*/, "");
-
-          // Calculate duration in hours and minutes
           const durationMs = arg.event.end.getTime() - arg.event.start.getTime();
           const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
           const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
 
-          // Format duration (remove `0h` if hours are 0)
           let durationFormatted = "";
-          if (durationHours > 0) {
-            durationFormatted += `${durationHours}h`;
-          }
-          if (durationMinutes > 0) {
-            durationFormatted += ` ${durationMinutes}m`;
-          }
-          if (durationFormatted) {
-            durationFormatted = `(${durationFormatted.trim()})`;
-          }
-
+          if (durationHours > 0) durationFormatted += `${durationHours}h`;
+          if (durationMinutes > 0) durationFormatted += ` ${durationMinutes}m`;
+          if (durationFormatted) durationFormatted = `(${durationFormatted.trim()})`;
 
           return (
             <div style={{
@@ -580,19 +705,19 @@ const Calendar = () => {
             }}>
               {arg.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {arg.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} | {cleanEventTitle(cleanedTitle)} {durationFormatted}
             </div>
+
           );
         }}
         eventDidMount={(info) => {
-          info.el.oncontextmenu = (e) => {  // Right-click to delete
+          info.el.oncontextmenu = (e) => {
             e.preventDefault();
             handleEventDelete(info);
           };
         }}
-
       />
-
     </div>
   );
+
 };
 
 export default Calendar;

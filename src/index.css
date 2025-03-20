@@ -77,6 +77,24 @@ button {
   cursor: pointer;
   transition: 0.2s ease-in-out;
 }
+/* Different button colors */
+.current-events { background: #007bff; color: white; }
+.normal-day, .extra-class-day, .weekend, .saved-to-file { background: #f1f1f1; color: black; }
+.copy-events { background: #3498db; color: white; }
+.save-events { background: #2c3e50; color: white; }
+
+/* Responsive behavior: Hide text, show short names */
+@media (max-width: 600px) {
+  .navbar button::before, .button-container button::before {
+    content: attr(data-short);
+    font-weight: bold;
+  }
+
+  .navbar button span, .button-container button span {
+    display: none; /* Hide the full text */
+  }
+}
+
 
 /* Navbar buttons */
 .navbar {
