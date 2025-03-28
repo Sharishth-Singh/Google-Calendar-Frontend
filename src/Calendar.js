@@ -12,16 +12,28 @@ const highlightWords = [
   "stop chasing", "study like", "5-minute rule", "bath", "sleep"
 ];
 
+const classWords = [
+  "class", "lecture", "tutorial", "session", "meeting", "workshop",
+]
+
 // Format time in HH:MM AM/PM format
 const formatTime = (date) => {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
 };
 const getEventClass = (title, duration) => {
   const cleanedTitle = title.toLowerCase();
+  if (classWords.some(word => cleanedTitle.includes(word)) && 
+      !cleanedTitle.includes("notes") && 
+      !cleanedTitle.includes("study")) {
+    return "green-event"; // Apply green only if "notes" and "study" are NOT present
+  }
+
   if (highlightWords.some(word => cleanedTitle.includes(word))) return "pink-event";
   if (duration < 15) return "small-event";
+  
   return "yellow-event";
 };
+
 
 // Format duration in HH:MM (e.g., "1h 30m")
 const formatDuration = (minutes) => {
@@ -263,24 +275,25 @@ const Calendar = () => {
     adjustPopupSize(); // Initial call
 
     // Function to save event
-    const saveEvent = () => {
-      const eventName = textarea.value.trim();
-      if (eventName) {
-        const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
-        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${eventName} (${duration}m)`;
+const saveEvent = () => {
+  const eventName = textarea.value.trim();
+  if (eventName) {
+    const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
+    const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${eventName} (${duration}m)`;
 
-        const newEvent = {
-          id: `${eventName}-${start.getTime()}`,
-          title: formattedTitle,
-          start,
-          end,
-          className: "yellow-event",
-        };
-
-        setEvents((prevEvents) => [...prevEvents, newEvent]); // Add new event
-      }
-      closePopup();
+    const newEvent = {
+      id: `${eventName}-${start.getTime()}`,
+      title: formattedTitle,
+      start,
+      end,
+      className: getEventClass(eventName, duration), // Dynamic class assignment
     };
+
+    setEvents((prevEvents) => [...prevEvents, newEvent]); // Add new event
+  }
+  closePopup();
+};
+
 
     // Function to close popup
     const closePopup = () => {
@@ -324,11 +337,12 @@ const Calendar = () => {
               // const cleanedTitle = cleanEventTitle(event.title);
               const cleanedTitle = removeAfterFirstEmoji(event.title);
               const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
-              const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
-                ? "pink-event"
-                : duration < 15
-                  ? "small-event"
-                  : "yellow-event";
+              const eventClass = getEventClass(cleanedTitle, duration); // Dynamic class assignment
+              // highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
+              //   ? "pink-event"
+              //   : duration < 15
+              //     ? "small-event"
+              //     : "yellow-event";
 
               return {
                 title: formattedTitle,
@@ -434,11 +448,12 @@ const Calendar = () => {
 
         const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
 
-        const eventClass = highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
-          ? "pink-event"
-          : duration < 15
-            ? "small-event"
-            : "yellow-event";
+        const eventClass = getEventClass(cleanedTitle, duration);
+        // highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
+        //   ? "pink-event"
+        //   : duration < 15
+        //     ? "small-event"
+        //     : "yellow-event";
 
         return {
           title: formattedTitle,
@@ -651,28 +666,32 @@ const Calendar = () => {
     adjustPopupSize(); // Initial call
 
     // Function to save changes
-    const saveChanges = () => {
-      const newTitle = textarea.value.trim();
-      if (newTitle) {
-        const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
-        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${newTitle} (${duration}m)`;
-        const newEventId = `${newTitle}-${start.getTime()}`; // Generate new event ID
+const saveChanges = () => {
+  const newTitle = textarea.value.trim();
+  if (newTitle) {
+    const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
+    const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${newTitle} (${duration}m)`;
+    const newEventId = `${newTitle}-${start.getTime()}`; // Generate new event ID
 
-        // Update event title in FullCalendar
-        oldEvent.setProp("title", formattedTitle);
+    // Get new class based on updated title and duration
+    const newClass = getEventClass(newTitle, duration);
 
-        // Since FullCalendar doesn't allow changing `id` directly, update state
-        setEvents((prevEvents) =>
-          prevEvents.map((event) =>
-            event.id === oldEventId
-              ? { ...event, id: newEventId, title: formattedTitle }
-              : event
-          )
-        );
+    // Update event properties in FullCalendar
+    oldEvent.setProp("title", formattedTitle);
+    oldEvent.setProp("classNames", [newClass]); // Update class for color change
 
-      }
-      closePopup();
-    };
+    // Since FullCalendar doesn't allow changing `id` directly, update state
+    setEvents((prevEvents) =>
+      prevEvents.map((event) =>
+        event.id === oldEventId
+          ? { ...event, id: newEventId, title: formattedTitle, className: newClass }
+          : event
+      )
+    );
+  }
+  closePopup();
+};
+
 
     // Function to cancel changes
     const cancelChanges = () => {
@@ -735,7 +754,7 @@ const Calendar = () => {
 
   // Save updated events back to API
   const saveEventsToFile = () => {
-    const userConfirmed = window.confirm("Are you sure you want to save the changes?");
+    const userConfirmed = window.confirm("Are you sure you want to publish in google calendar the changes?");
     if (!userConfirmed) return;
 
     setSavingEvent(true);

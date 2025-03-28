@@ -30,6 +30,13 @@ body {
   padding: 2px 5px !important;
 }
 
+.green-event {
+  background-color: #55B080 !important;
+  color: rgb(255, 255, 255) !important;
+  font-size: 12px !important;
+  padding: 2px 5px !important;
+}
+
 .yellow-event {
   background-color: #ffe135 !important; /* Banana Yellow */
   color: black !important;
