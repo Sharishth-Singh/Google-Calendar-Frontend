@@ -4,6 +4,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import "./index.css"; // Import CSS file
 import { set } from "date-fns";
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const highlightWords = [
   "break", "dinner", "good morning", "your journey", "lunch", "relaxation",
@@ -73,7 +74,7 @@ const Calendar = () => {
   const [savingEvent, setSavingEvent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
-  const [viewMode, setViewMode] = useState("Current Events"); // Default view mode
+  const [viewMode, setViewMode] = useState("Saved to File"); // Default view mode
 
 
   const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend", "Saved to File"];
@@ -152,156 +153,156 @@ const Calendar = () => {
 
 
   // Function to handle new event creation
-const handleDateSelect = (selectInfo) => {
-  const start = selectInfo.start;
-  const end = selectInfo.end;
+  const handleDateSelect = (selectInfo) => {
+    const start = selectInfo.start;
+    const end = selectInfo.end;
 
-  // Prevent multiple popups
-  if (document.getElementById("event-create-popup")) return;
+    // Prevent multiple popups
+    if (document.getElementById("event-create-popup")) return;
 
-  // Create dark background overlay
-  const overlay = document.createElement("div");
-  overlay.id = "popup-overlay";
-  Object.assign(overlay.style, {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100vw",
-    height: "100vh",
-    background: "rgba(0, 0, 0, 0.5)",
-    zIndex: 999,
-  });
+    // Create dark background overlay
+    const overlay = document.createElement("div");
+    overlay.id = "popup-overlay";
+    Object.assign(overlay.style, {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(0, 0, 0, 0.5)",
+      zIndex: 999,
+    });
 
-  // Create popup container
-  const popup = document.createElement("div");
-  popup.id = "event-create-popup";
-  Object.assign(popup.style, {
-    position: "fixed",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    background: "white",
-    width: "90%",
-    height: "350px",
-    maxWidth: "400px",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    borderRadius: "8px",
-    zIndex: 1000,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  });
+    // Create popup container
+    const popup = document.createElement("div");
+    popup.id = "event-create-popup";
+    Object.assign(popup.style, {
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      background: "white",
+      width: "90%",
+      height: "350px",
+      maxWidth: "400px",
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+      borderRadius: "8px",
+      zIndex: 1000,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    });
 
-  // Create title
-  const title = document.createElement("h3");
-  title.innerText = "Enter Event Name";
-  Object.assign(title.style, {
-    marginBottom: "10px",
-    textAlign: "center",
-  });
+    // Create title
+    const title = document.createElement("h3");
+    title.innerText = "Enter Event Name";
+    Object.assign(title.style, {
+      marginBottom: "10px",
+      textAlign: "center",
+    });
 
-  // Create textarea field
-  const textarea = document.createElement("textarea");
-  Object.assign(textarea.style, {
-    fontSize: "16px",
-    padding: "10px",
-    border: "1px solid #ccc",
-    borderRadius: "5px",
-    width: "100%",
-    height: "90%",
-    resize: "none",
-  });
+    // Create textarea field
+    const textarea = document.createElement("textarea");
+    Object.assign(textarea.style, {
+      fontSize: "16px",
+      padding: "10px",
+      border: "1px solid #ccc",
+      borderRadius: "5px",
+      width: "100%",
+      height: "90%",
+      resize: "none",
+    });
 
-  // Create button container
-  const buttonContainer = document.createElement("div");
-  Object.assign(buttonContainer.style, {
-    marginTop: "15px",
-    display: "flex",
-    justifyContent: "space-around",
-    width: "100%",
-  });
+    // Create button container
+    const buttonContainer = document.createElement("div");
+    Object.assign(buttonContainer.style, {
+      marginTop: "15px",
+      display: "flex",
+      justifyContent: "space-around",
+      width: "100%",
+    });
 
-  // Create "✔" (Save) button
-  const saveButton = document.createElement("button");
-  saveButton.innerHTML = "✔ Save";
-  Object.assign(saveButton.style, {
-    background: "#4CAF50",
-    color: "white",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "14px",
-    padding: "8px 15px",
-    borderRadius: "5px",
-  });
+    // Create "✔" (Save) button
+    const saveButton = document.createElement("button");
+    saveButton.innerHTML = "✔ Save";
+    Object.assign(saveButton.style, {
+      background: "#4CAF50",
+      color: "white",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "14px",
+      padding: "8px 15px",
+      borderRadius: "5px",
+    });
 
-  // Create "✖" (Cancel) button
-  const cancelButton = document.createElement("button");
-  cancelButton.innerHTML = "✖ Cancel";
-  Object.assign(cancelButton.style, {
-    background: "#f44336",
-    color: "white",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "14px",
-    padding: "8px 15px",
-    borderRadius: "5px",
-  });
+    // Create "✖" (Cancel) button
+    const cancelButton = document.createElement("button");
+    cancelButton.innerHTML = "✖ Cancel";
+    Object.assign(cancelButton.style, {
+      background: "#f44336",
+      color: "white",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "14px",
+      padding: "8px 15px",
+      borderRadius: "5px",
+    });
 
-  // Adjust popup size on small screens
-  const adjustPopupSize = () => {
-    if (window.innerWidth < 500) {
-      popup.style.width = "90%";
-      popup.style.padding = "20px";
-    } else {
-      popup.style.width = "400px";
-      popup.style.padding = "40px";
-    }
+    // Adjust popup size on small screens
+    const adjustPopupSize = () => {
+      if (window.innerWidth < 500) {
+        popup.style.width = "90%";
+        popup.style.padding = "20px";
+      } else {
+        popup.style.width = "400px";
+        popup.style.padding = "40px";
+      }
+    };
+
+    window.addEventListener("resize", adjustPopupSize);
+    adjustPopupSize(); // Initial call
+
+    // Function to save event
+    const saveEvent = () => {
+      const eventName = textarea.value.trim();
+      if (eventName) {
+        const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
+        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${eventName} (${duration}m)`;
+
+        const newEvent = {
+          id: `${eventName}-${start.getTime()}`,
+          title: formattedTitle,
+          start,
+          end,
+          className: "yellow-event",
+        };
+
+        setEvents((prevEvents) => [...prevEvents, newEvent]); // Add new event
+      }
+      closePopup();
+    };
+
+    // Function to close popup
+    const closePopup = () => {
+      document.body.removeChild(popup);
+      document.body.removeChild(overlay);
+      window.removeEventListener("resize", adjustPopupSize);
+    };
+
+    // Event listeners
+    saveButton.addEventListener("click", saveEvent);
+    cancelButton.addEventListener("click", closePopup);
+
+    // Append elements
+    buttonContainer.appendChild(saveButton);
+    buttonContainer.appendChild(cancelButton);
+    popup.appendChild(title);
+    popup.appendChild(textarea);
+    popup.appendChild(buttonContainer);
+    document.body.appendChild(overlay);
+    document.body.appendChild(popup);
+    textarea.focus();
   };
-
-  window.addEventListener("resize", adjustPopupSize);
-  adjustPopupSize(); // Initial call
-
-  // Function to save event
-  const saveEvent = () => {
-    const eventName = textarea.value.trim();
-    if (eventName) {
-      const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
-      const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${eventName} (${duration}m)`;
-
-      const newEvent = {
-        id: `${eventName}-${start.getTime()}`,
-        title: formattedTitle,
-        start,
-        end,
-        className: "yellow-event",
-      };
-
-      setEvents((prevEvents) => [...prevEvents, newEvent]); // Add new event
-    }
-    closePopup();
-  };
-
-  // Function to close popup
-  const closePopup = () => {
-    document.body.removeChild(popup);
-    document.body.removeChild(overlay);
-    window.removeEventListener("resize", adjustPopupSize);
-  };
-
-  // Event listeners
-  saveButton.addEventListener("click", saveEvent);
-  cancelButton.addEventListener("click", closePopup);
-
-  // Append elements
-  buttonContainer.appendChild(saveButton);
-  buttonContainer.appendChild(cancelButton);
-  popup.appendChild(title);
-  popup.appendChild(textarea);
-  popup.appendChild(buttonContainer);
-  document.body.appendChild(overlay);
-  document.body.appendChild(popup);
-  textarea.focus();
-};
 
 
 
@@ -734,6 +735,9 @@ const handleDateSelect = (selectInfo) => {
 
   // Save updated events back to API
   const saveEventsToFile = () => {
+    const userConfirmed = window.confirm("Are you sure you want to save the changes?");
+    if (!userConfirmed) return;
+
     setSavingEvent(true);
 
     const timeSlots = events.map(event => {
@@ -749,6 +753,7 @@ const handleDateSelect = (selectInfo) => {
     const payload = {
       time_slots: timeSlots
     };
+
 
     fetch("https://sharishth.pythonanywhere.com/add-events/", {
       // fetch("http://localhost:8000/add-events/", {
@@ -774,32 +779,45 @@ const handleDateSelect = (selectInfo) => {
   return (
     <div className="calendar-container">
       {/* Navigation Bar */}
-      <div className="navbar">
-        {viewModes.map(mode => (
-          <button
-            key={mode}
-            className={`nav-btn ${viewMode === mode ? "active" : ""}`}
-            data-short={mode === "Current Events" ? "CE" :
-              mode === "Normal Day" ? "ND" :
-                mode === "Extra Class Day" ? "ED" :
-                  mode === "Weekend" ? "We" :
-                    mode === "Saved to File" ? "File" : mode}
-            onClick={() => setViewMode(mode)}
-          >
-            <span>{mode}</span>
-          </button>
-        ))}
-      </div>
+<div className="navbar">
+  {viewModes.map(mode => (
+    <button
+      key={mode}
+      className={`nav-btn ${viewMode === mode ? "active" : ""}`}
+      data-short={mode === "Current Events" ? "CE" :
+        mode === "Normal Day" ? "ND" :
+        mode === "Extra Class Day" ? "ED" :
+        mode === "Weekend" ? "We" :
+        mode === "Saved to File" ? "File" : mode}
+      onClick={() => setViewMode(mode)}
+    >
+      <i className={`fas ${
+        mode === "Current Events" ? "fa-calendar-day" :
+        mode === "Normal Day" ? "fa-calendar-check" :
+        mode === "Extra Class Day" ? "fa-book-open" :
+        mode === "Weekend" ? "fa-umbrella-beach" :
+        mode === "Saved to File" ? "fa-file-alt" : "fa-calendar"} icon`}
+        style={{marginRight: "8px"}}></i>
+      <span>{mode}</span>
+    </button>
+  ))}
+</div>
 
-      {/* Button Container */}
-      <div className="button-container">
-        <button onClick={updateFileContent} className="copy-btn" data-short="Copy">
-          <span>Copy Events</span>
-        </button>
-        <button onClick={saveEventsToFile} className="save-btn" data-short="Save">
-          <span>Save Events</span>
-        </button>
-      </div>
+
+{/* Button Container */}
+<div className="button-container">
+  <button onClick={saveEventsToFile} className="save-btn" data-short="">
+    <i className="fas fa-upload"></i>
+    <span className="button-text">Publish Events</span>
+
+  </button>
+  <button onClick={updateFileContent} className="copy-btn" data-short="">
+    <i className="fas fa-copy"></i>
+    <span className="button-text">Copy Events</span>
+  </button>
+</div>
+
+
 
       {/* Loading Screens */}
       {savingEvent && (
