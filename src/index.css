@@ -12,52 +12,65 @@ body {
 .fc {
   margin: 10px;
   font-size: 14px;
-  color: black !important;
+  /* color: black; */
 }
 
 /* Ensure event title text is black */
 .fc-event-title, 
 .fc-event-time, 
 .fc-event {
-  color: black !important;
+  /* color: black; */
 }
 
 /* Individual event styles */
-.pink-event {
+.fc .pink-event {
   background-color: pink !important;
   color: black !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
   padding: 2px 5px !important;
 }
 
-.green-event {
+.fc .green-event {
   background-color: #55B080 !important;
   color: rgb(255, 255, 255) !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
   padding: 2px 5px !important;
 }
 
-.yellow-event {
+.fc-event.green-event {
+  color: rgb(255, 255, 255) !important;
+}
+
+.fc .yellow-event {
   background-color: #ffe135 !important; /* Banana Yellow */
   color: black !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
   padding: 2px 5px !important;
 }
 
-.small-event {
-  background-color: red !important;
+.fc .small-event {
+  background-color: pink !important;
   color: black !important;
+  padding: 2px 5px !important;
+  /* font-size: 8px !important; */
+}
+
+.fc-event.small-event {
   font-size: 10px !important;
-  padding: 1px 3px !important;
-  height: 14px !important;
-  line-height: 1.2 !important;
+  margin-top: 0px !important;
+  padding: 0px !important;
 }
 
 /* FullCalendar Event Text */
 .fc-daygrid-event, 
 .fc-timegrid-event, 
 .fc-event-main {
-  color: black !important;
+  /* color: rgb(0, 0, 0) !important; */
+  /* font-size: 17px ; */
+  width: 100% !important;  /* Make event take full width */
+  display: block !important;  /* Ensure it's not inline */
+  white-space: normal !important; /* Prevent text overflow */
+
 }
 
 /* Timegrid slot height */
@@ -72,7 +85,7 @@ body {
   padding: 2px 5px !important;
   font-size: 12px !important;
   line-height: 1.3 !important;
-  color: black !important;
+  /* color: black !important; */
 }
 
 /* --- BUTTON FIXES --- */
@@ -216,6 +229,7 @@ button {
   left: 0;
   width: 100%;
   height: 100%;
+  margin-right: 4px;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;

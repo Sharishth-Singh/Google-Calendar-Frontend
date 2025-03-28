@@ -22,15 +22,17 @@ const formatTime = (date) => {
 };
 const getEventClass = (title, duration) => {
   const cleanedTitle = title.toLowerCase();
-  if (classWords.some(word => cleanedTitle.includes(word)) && 
-      !cleanedTitle.includes("notes") && 
-      !cleanedTitle.includes("study")) {
+  if (duration <= 15) return "small-event";
+
+  if (classWords.some(word => cleanedTitle.includes(word)) &&
+    !cleanedTitle.includes("notes") &&
+    !cleanedTitle.includes("study")) {
     return "green-event"; // Apply green only if "notes" and "study" are NOT present
   }
 
   if (highlightWords.some(word => cleanedTitle.includes(word))) return "pink-event";
-  if (duration < 15) return "small-event";
-  
+  if (duration <= 15) return "small-event";
+
   return "yellow-event";
 };
 
@@ -275,24 +277,24 @@ const Calendar = () => {
     adjustPopupSize(); // Initial call
 
     // Function to save event
-const saveEvent = () => {
-  const eventName = textarea.value.trim();
-  if (eventName) {
-    const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
-    const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${eventName} (${duration}m)`;
+    const saveEvent = () => {
+      const eventName = textarea.value.trim();
+      if (eventName) {
+        const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
+        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${eventName} (${duration}m)`;
 
-    const newEvent = {
-      id: `${eventName}-${start.getTime()}`,
-      title: formattedTitle,
-      start,
-      end,
-      className: getEventClass(eventName, duration), // Dynamic class assignment
+        const newEvent = {
+          id: `${eventName}-${start.getTime()}`,
+          title: formattedTitle,
+          start,
+          end,
+          className: getEventClass(eventName, duration), // Dynamic class assignment
+        };
+
+        setEvents((prevEvents) => [...prevEvents, newEvent]); // Add new event
+      }
+      closePopup();
     };
-
-    setEvents((prevEvents) => [...prevEvents, newEvent]); // Add new event
-  }
-  closePopup();
-};
 
 
     // Function to close popup
@@ -666,31 +668,31 @@ const saveEvent = () => {
     adjustPopupSize(); // Initial call
 
     // Function to save changes
-const saveChanges = () => {
-  const newTitle = textarea.value.trim();
-  if (newTitle) {
-    const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
-    const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${newTitle} (${duration}m)`;
-    const newEventId = `${newTitle}-${start.getTime()}`; // Generate new event ID
+    const saveChanges = () => {
+      const newTitle = textarea.value.trim();
+      if (newTitle) {
+        const duration = Math.round((end - start) / (1000 * 60)); // Duration in minutes
+        const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${newTitle} (${duration}m)`;
+        const newEventId = `${newTitle}-${start.getTime()}`; // Generate new event ID
 
-    // Get new class based on updated title and duration
-    const newClass = getEventClass(newTitle, duration);
+        // Get new class based on updated title and duration
+        const newClass = getEventClass(newTitle, duration);
 
-    // Update event properties in FullCalendar
-    oldEvent.setProp("title", formattedTitle);
-    oldEvent.setProp("classNames", [newClass]); // Update class for color change
+        // Update event properties in FullCalendar
+        oldEvent.setProp("title", formattedTitle);
+        oldEvent.setProp("classNames", [newClass]); // Update class for color change
 
-    // Since FullCalendar doesn't allow changing `id` directly, update state
-    setEvents((prevEvents) =>
-      prevEvents.map((event) =>
-        event.id === oldEventId
-          ? { ...event, id: newEventId, title: formattedTitle, className: newClass }
-          : event
-      )
-    );
-  }
-  closePopup();
-};
+        // Since FullCalendar doesn't allow changing `id` directly, update state
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.id === oldEventId
+              ? { ...event, id: newEventId, title: formattedTitle, className: newClass }
+              : event
+          )
+        );
+      }
+      closePopup();
+    };
 
 
     // Function to cancel changes
@@ -798,43 +800,42 @@ const saveChanges = () => {
   return (
     <div className="calendar-container">
       {/* Navigation Bar */}
-<div className="navbar">
-  {viewModes.map(mode => (
-    <button
-      key={mode}
-      className={`nav-btn ${viewMode === mode ? "active" : ""}`}
-      data-short={mode === "Current Events" ? "CE" :
-        mode === "Normal Day" ? "ND" :
-        mode === "Extra Class Day" ? "ED" :
-        mode === "Weekend" ? "We" :
-        mode === "Saved to File" ? "File" : mode}
-      onClick={() => setViewMode(mode)}
-    >
-      <i className={`fas ${
-        mode === "Current Events" ? "fa-calendar-day" :
-        mode === "Normal Day" ? "fa-calendar-check" :
-        mode === "Extra Class Day" ? "fa-book-open" :
-        mode === "Weekend" ? "fa-umbrella-beach" :
-        mode === "Saved to File" ? "fa-file-alt" : "fa-calendar"} icon`}
-        style={{marginRight: "8px"}}></i>
-      <span>{mode}</span>
-    </button>
-  ))}
-</div>
+      <div className="navbar">
+        {viewModes.map(mode => (
+          <button
+            key={mode}
+            className={`nav-btn ${viewMode === mode ? "active" : ""}`}
+            data-short={mode === "Current Events" ? "CE" :
+              mode === "Normal Day" ? "ND" :
+                mode === "Extra Class Day" ? "ED" :
+                  mode === "Weekend" ? "We" :
+                    mode === "Saved to File" ? "File" : mode}
+            onClick={() => setViewMode(mode)}
+          >
+            <i className={`fas ${mode === "Current Events" ? "fa-calendar-day" :
+                mode === "Normal Day" ? "fa-calendar-check" :
+                  mode === "Extra Class Day" ? "fa-book-open" :
+                    mode === "Weekend" ? "fa-umbrella-beach" :
+                      mode === "Saved to File" ? "fa-file-alt" : "fa-calendar"} icon`}
+              style={{ marginRight: "8px" }}></i>
+            <span>{mode}</span>
+          </button>
+        ))}
+      </div>
 
 
-{/* Button Container */}
-<div className="button-container">
-  <button onClick={saveEventsToFile} className="save-btn" data-short="">
-    <i className="fas fa-upload"></i>
-    <span className="button-text">Publish Events</span>
+      {/* Button Container */}
+      <div className="button-container">
+        <button onClick={saveEventsToFile} className="save-btn" data-short="">
+          <i className="fas fa-upload"></i>
+          <span className="button-text">Publish Events</span>
 
-  </button>
-  <button onClick={updateFileContent} className="copy-btn" data-short="">
-    <i className="fas fa-copy"></i>
-    <span className="button-text">Copy Events</span>
-  </button>
-</div>
+        </button>
+        <button onClick={updateFileContent} className="copy-btn" data-short="">
+          <i className="fas fa-copy"></i>
+          <span className="button-text">Copy Events</span>
+        </button>
+      </div>
 
 
 
@@ -874,7 +875,8 @@ const saveChanges = () => {
         contentHeight="auto"
         selectable={true}
         select={handleDateSelect}
-        height="800px"
+        eventTextColor="black"
+        height="auto"
         snapDuration="00:15:00"
 
         /* Hide "Today" button */
@@ -898,9 +900,9 @@ const saveChanges = () => {
 
           return (
             <div style={{
-              fontSize: "14px",
-              padding: "3px 6px",
-              borderRadius: "4px"
+              // fontSize: "14px",
+              // padding: "3px 6px",
+              borderRadius: "7px"
             }}>
               {arg.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {arg.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} | {cleanEventTitle(cleanedTitle)} {durationFormatted}
             </div>
@@ -912,7 +914,13 @@ const saveChanges = () => {
             e.preventDefault();
             handleEventDelete(info);
           };
+
+          // info.el.style.width = "100%";  // ✅ Full width
+          // info.el.style.display = "block";  // ✅ Ensure it takes full space
+          // info.el.style.whiteSpace = "normal"; // Prevent text from shrinking
+
         }}
+
       />
     </div>
   );
