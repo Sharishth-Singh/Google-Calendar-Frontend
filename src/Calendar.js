@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import "./index.css"; // Import CSS file
-import { set } from "date-fns";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const highlightWords = [
@@ -89,12 +88,37 @@ const Calendar = () => {
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
   const [viewMode, setViewMode] = useState("Saved to File"); // Default view mode
-
+  let [count, setCount] = useState(0);
+  const [dots, setDots] = useState("...");
 
   const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend", "Saved to File"];
 
+  useEffect(() => {
+    const dotSequence = ["...", "..", ".", "..", "..."]; // Sequence of dots
+    let index = 0;
+    
+    const interval = setInterval(() => {
+      setDots(dotSequence[index]);
+      index = (index + 1) % dotSequence.length; // Cycle through dots
+    }, 500); // Change every 500ms
 
+    return () => clearInterval(interval); // Cleanup when savingEvent changes
+  }, [savingEvent, loading]); // Restart when savingEvent changes
 
+  useEffect(() => {
+    let interval;
+
+    if (loading || savingEvent) { // Start counter only when loading or savingEvent is true
+      interval = setInterval(() => {
+        setCount(prevCount => prevCount + 1);
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(interval)
+      setCount(0); // Reset count when loading or savingEvent changes
+    }; // Cleanup when either changes
+  }, [loading, savingEvent]);
 
   const handleEventDelete = (clickInfo) => {
     const eventId = clickInfo.event.id;
@@ -758,7 +782,6 @@ const Calendar = () => {
   const saveEventsToFile = () => {
     const userConfirmed = window.confirm("Are you sure you want to publish in google calendar the changes?");
     if (!userConfirmed) return;
-
     setSavingEvent(true);
 
     const timeSlots = events.map(event => {
@@ -813,10 +836,10 @@ const Calendar = () => {
             onClick={() => setViewMode(mode)}
           >
             <i className={`fas ${mode === "Current Events" ? "fa-calendar-day" :
-                mode === "Normal Day" ? "fa-calendar-check" :
-                  mode === "Extra Class Day" ? "fa-book-open" :
-                    mode === "Weekend" ? "fa-umbrella-beach" :
-                      mode === "Saved to File" ? "fa-file-alt" : "fa-calendar"} icon`}
+              mode === "Normal Day" ? "fa-calendar-check" :
+                mode === "Extra Class Day" ? "fa-book-open" :
+                  mode === "Weekend" ? "fa-umbrella-beach" :
+                    mode === "Saved to File" ? "fa-file-alt" : "fa-calendar"} icon`}
               style={{ marginRight: "8px" }}></i>
             <span>{mode}</span>
           </button>
@@ -843,13 +866,21 @@ const Calendar = () => {
       {savingEvent && (
         <div className="loading-screen">
           <div className="spinner"></div>
-          <p>Saving events, please wait...</p>
+          <div className="counter" id="counter">{count}s</div>
+          <p>
+            Saving events, please wait<span className="dots">{dots}</span>
+          </p>
         </div>
       )}
+
+
       {loading && (
         <div className="loading-screen">
-          <div className="spinner"></div>
-          <p>Loading events, please wait...</p>
+          <div className="loader-container">
+            <div className="spinner" ></div>
+            <div className="counter" id="counter">{count}s</div>
+          </div>
+          Loading events, please wait<span className="dots">{dots}</span>
         </div>
       )}
 
@@ -900,8 +931,6 @@ const Calendar = () => {
 
           return (
             <div style={{
-              // fontSize: "14px",
-              // padding: "3px 6px",
               borderRadius: "7px"
             }}>
               {arg.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {arg.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} | {cleanEventTitle(cleanedTitle)} {durationFormatted}
@@ -914,11 +943,6 @@ const Calendar = () => {
             e.preventDefault();
             handleEventDelete(info);
           };
-
-          // info.el.style.width = "100%";  // ✅ Full width
-          // info.el.style.display = "block";  // ✅ Ensure it takes full space
-          // info.el.style.whiteSpace = "normal"; // Prevent text from shrinking
-
         }}
 
       />
