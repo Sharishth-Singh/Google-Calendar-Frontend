@@ -98,7 +98,7 @@ const Calendar = () => {
   const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend", "Saved to File"];
 
   useEffect(() => {
-    const dotSequence = ["...", "..", ".", "..", "..."]; // Sequence of dots
+    const dotSequence = ["...", "..", "."]; // Sequence of dots
     let index = 0;
 
     const interval = setInterval(() => {
