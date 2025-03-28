@@ -48,6 +48,13 @@ body {
   padding: 2px 5px !important;
 }
 
+.fc .avacado-event{
+  background-color: #BCC256 !important; /* Avocado Green */
+  color: black !important;
+  font-size: 14px !important;
+  padding: 2px 5px !important;
+}
+
 .fc .small-event {
   background-color: pink !important;
   color: black !important;

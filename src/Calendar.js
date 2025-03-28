@@ -23,16 +23,20 @@ const getEventClass = (title, duration) => {
   const cleanedTitle = title.toLowerCase();
   if (duration <= 15) return "small-event";
 
+
   if (classWords.some(word => cleanedTitle.includes(word)) &&
     !cleanedTitle.includes("notes") &&
     !cleanedTitle.includes("study")) {
     return "green-event"; // Apply green only if "notes" and "study" are NOT present
   }
 
-  if (highlightWords.some(word => cleanedTitle.includes(word))) return "pink-event";
-  if (duration <= 15) return "small-event";
+  if(cleanedTitle.includes("psir")) {
+    return "yellow-event"; // Apply avacado if "notes" is present
+  }
 
-  return "yellow-event";
+  if (highlightWords.some(word => cleanedTitle.includes(word))) return "pink-event";
+
+  return "avacado-event";
 };
 
 
