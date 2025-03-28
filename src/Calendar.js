@@ -1,4 +1,4 @@
-import {useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -30,7 +30,7 @@ const getEventClass = (title, duration) => {
     return "green-event"; // Apply green only if "notes" and "study" are NOT present
   }
 
-  if(cleanedTitle.includes("psir")) {
+  if (cleanedTitle.includes("psir")) {
     return "yellow-event"; // Apply avacado if "notes" is present
   }
 
@@ -100,7 +100,7 @@ const Calendar = () => {
   useEffect(() => {
     const dotSequence = ["...", "..", ".", "..", "..."]; // Sequence of dots
     let index = 0;
-    
+
     const interval = setInterval(() => {
       setDots(dotSequence[index]);
       index = (index + 1) % dotSequence.length; // Cycle through dots
@@ -869,11 +869,11 @@ const Calendar = () => {
       {/* Loading Screens */}
       {savingEvent && (
         <div className="loading-screen">
-          <div className="spinner"></div>
-          <div className="counter" id="counter">{count}s</div>
-          <p>
-            Saving events, please wait<span className="dots">{dots}</span>
-          </p>
+          <div className="loader-container">
+            <div className="spinner" ></div>
+            <div className="counter" id="counter">{count}s</div>
+          </div>
+          Saving events, please wait<span className="dots">{dots}</span>
         </div>
       )}
 
