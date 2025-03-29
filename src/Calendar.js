@@ -25,8 +25,7 @@ const getEventClass = (title, duration) => {
 
 
   if (classWords.some(word => cleanedTitle.includes(word)) &&
-    !cleanedTitle.includes("notes") &&
-    !cleanedTitle.includes("study")) {
+    !cleanedTitle.includes("notes")){
     return "green-event"; // Apply green only if "notes" and "study" are NOT present
   }
 
