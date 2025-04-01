@@ -21,8 +21,7 @@ const formatTime = (date) => {
 };
 const getEventClass = (title, duration) => {
   const cleanedTitle = title.toLowerCase();
-  if (duration <= 15) return "small-event";
-
+  if(duration <= 25) return "small-event";
 
   if (classWords.some(word => cleanedTitle.includes(word)) &&
     !cleanedTitle.includes("notes")){
@@ -936,7 +935,7 @@ const Calendar = () => {
             <div style={{
               borderRadius: "7px"
             }}>
-              {arg.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {arg.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} | {cleanEventTitle(cleanedTitle)} {durationFormatted}
+              {arg.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {arg.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} | <b>{cleanEventTitle(cleanedTitle)}</b>  {durationFormatted}
             </div>
 
           );
