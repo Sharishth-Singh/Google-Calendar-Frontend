@@ -21,7 +21,6 @@ const formatTime = (date) => {
 };
 const getEventClass = (title, duration) => {
   const cleanedTitle = title.toLowerCase();
-  if(duration <= 25) return "small-event";
 
   if (classWords.some(word => cleanedTitle.includes(word)) &&
     !cleanedTitle.includes("notes")){
@@ -32,8 +31,11 @@ const getEventClass = (title, duration) => {
     return "yellow-event"; // Apply avacado if "notes" is present
   }
 
-  if (highlightWords.some(word => cleanedTitle.includes(word))) return "pink-event";
-
+  if (highlightWords.some(word => cleanedTitle.includes(word))){
+    if(duration <= 25) return "small-event";
+    return "pink-event";
+  } 
+  if(duration <=25) return "small-avacado-event";
   return "avacado-event";
 };
 
@@ -126,7 +128,7 @@ const Calendar = () => {
     const eventId = clickInfo.event.id;
     const eventTitle = clickInfo.event.title;
 
-    if (window.confirm(`Delete event: "${eventTitle}"?`)) {
+    if (window.confirm(`⚠️ Delete event: "${removeLastParentheses(cleanEventTitle(eventTitle)).split("|")[1]}"?`)) {
       setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
     }
   };

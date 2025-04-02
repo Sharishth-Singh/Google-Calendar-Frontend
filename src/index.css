@@ -68,6 +68,18 @@ body {
   padding: 0px !important;
 }
 
+.fc .small-avacado-event {
+  background-color: #BCC256  !important;
+  color: black !important;
+  padding: 2px 5px !important;
+  /* font-size: 8px !important; */
+}
+
+.fc-event.small-avacado-event {
+  font-size: 10px !important;
+  margin-top: 0px !important;
+  padding: 0px !important;
+}
 /* FullCalendar Event Text */
 .fc-daygrid-event, 
 .fc-timegrid-event, 
