@@ -97,32 +97,32 @@ const Calendar = () => {
 
   const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend", "Saved to File"];
 
-  useEffect(() => {
-    const dotSequence = ["...", "..", "."]; // Sequence of dots
-    let index = 0;
+useEffect(() => {
+  if (!loading && !savingEvent) {
+    setDots(""); // Reset dots when not loading/saving
+    setCount(0); // Reset counter
+    return;
+  }
 
-    const interval = setInterval(() => {
-      setDots(dotSequence[index]);
-      index = (index + 1) % dotSequence.length; // Cycle through dots
-    }, 500); // Change every 500ms
+  const dotSequence = ["",".", "..", "..."];
+  let dotIndex = 0;
 
-    return () => clearInterval(interval); // Cleanup when savingEvent changes
-  }, [savingEvent, loading]); // Restart when savingEvent changes
+  const dotInterval = setInterval(() => {
+    setDots(dotSequence[dotIndex]);
+    dotIndex = (dotIndex + 1) % dotSequence.length;
+  }, 500);
 
-  useEffect(() => {
-    let interval;
+  const countInterval = setInterval(() => {
+    setCount(prevCount => prevCount + 1);
+  }, 1000);
 
-    if (loading || savingEvent) { // Start counter only when loading or savingEvent is true
-      interval = setInterval(() => {
-        setCount(prevCount => prevCount + 1);
-      }, 1000);
-    }
+  return () => {
+    clearInterval(dotInterval);
+    clearInterval(countInterval);
+    setCount(0); // Reset count when loading/saving stops
+  };
+}, [loading, savingEvent]);
 
-    return () => {
-      clearInterval(interval)
-      setCount(0); // Reset count when loading or savingEvent changes
-    }; // Cleanup when either changes
-  }, [loading, savingEvent]);
 
   const handleEventDelete = (clickInfo) => {
     const eventId = clickInfo.event.id;
@@ -571,7 +571,7 @@ const Calendar = () => {
       }
       return event;
     });
-
+    console.log("Updated events after resize:", updatedEvents);
     setEvents(updatedEvents);
   };
 
