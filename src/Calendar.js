@@ -912,7 +912,7 @@ const Calendar = () => {
         select={handleDateSelect}
         eventTextColor="black"
         height="auto"
-        snapDuration="00:15:00"
+        snapDuration="00:05:00"
 
         /* Hide "Today" button */
         headerToolbar={{
