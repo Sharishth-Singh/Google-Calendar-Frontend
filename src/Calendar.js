@@ -23,7 +23,7 @@ const getEventClass = (title, duration) => {
   const cleanedTitle = title.toLowerCase();
 
   if (classWords.some(word => cleanedTitle.includes(word)) &&
-    !cleanedTitle.includes("notes")){
+    !cleanedTitle.includes("notes")) {
     return "green-event"; // Apply green only if "notes" and "study" are NOT present
   }
 
@@ -31,11 +31,11 @@ const getEventClass = (title, duration) => {
     return "yellow-event"; // Apply avacado if "notes" is present
   }
 
-  if (highlightWords.some(word => cleanedTitle.includes(word))){
-    if(duration <= 25) return "small-event";
+  if (highlightWords.some(word => cleanedTitle.includes(word))) {
+    if (duration <= 25) return "small-event";
     return "pink-event";
-  } 
-  if(duration <=25) return "small-avacado-event";
+  }
+  if (duration <= 25) return "small-avacado-event";
   return "avacado-event";
 };
 
@@ -91,37 +91,37 @@ const Calendar = () => {
   const [savingEvent, setSavingEvent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
-  const [viewMode, setViewMode] = useState("Saved to File"); // Default view mode
+  const [viewMode, setViewMode] = useState("File"); // Default view mode
   let [count, setCount] = useState(0);
   const [dots, setDots] = useState("...");
 
-  const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend", "Saved to File"];
+  const viewModes = ["Current Events", "Normal Day", "Extra Class Day", "Weekend", "File"];
 
-useEffect(() => {
-  if (!loading && !savingEvent) {
-    setDots(""); // Reset dots when not loading/saving
-    setCount(0); // Reset counter
-    return;
-  }
+  useEffect(() => {
+    if (!loading && !savingEvent) {
+      setDots(""); // Reset dots when not loading/saving
+      setCount(0); // Reset counter
+      return;
+    }
 
-  const dotSequence = ["",".", "..", "..."];
-  let dotIndex = 0;
+    const dotSequence = ["", ".", "..", "..."];
+    let dotIndex = 0;
 
-  const dotInterval = setInterval(() => {
-    setDots(dotSequence[dotIndex]);
-    dotIndex = (dotIndex + 1) % dotSequence.length;
-  }, 500);
+    const dotInterval = setInterval(() => {
+      setDots(dotSequence[dotIndex]);
+      dotIndex = (dotIndex + 1) % dotSequence.length;
+    }, 500);
 
-  const countInterval = setInterval(() => {
-    setCount(prevCount => prevCount + 1);
-  }, 1000);
+    const countInterval = setInterval(() => {
+      setCount(prevCount => prevCount + 1);
+    }, 1000);
 
-  return () => {
-    clearInterval(dotInterval);
-    clearInterval(countInterval);
-    setCount(0); // Reset count when loading/saving stops
-  };
-}, [loading, savingEvent]);
+    return () => {
+      clearInterval(dotInterval);
+      clearInterval(countInterval);
+      setCount(0); // Reset count when loading/saving stops
+    };
+  }, [loading, savingEvent]);
 
 
   const handleEventDelete = (clickInfo) => {
@@ -354,83 +354,76 @@ useEffect(() => {
     if (viewMode === "Current Events") {
       setLoading(true); // Start loading before API call
       fetch("https://sharishth.pythonanywhere.com/get_events/")
-        // fetch("http://localhost:8000/get_events/")
         .then((res) => res.json())
         .then((data) => {
-          setLoading(false); // Stop loading after response
+          setLoading(false);
           if (data.status === "success" && Array.isArray(data.events)) {
             const parsedEvents = data.events.map(event => {
               const startDate = new Date(event.start);
               const endDate = new Date(event.end);
-              const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
-
-              // const cleanedTitle = cleanEventTitle(event.title);
+              const duration = Math.round((endDate - startDate) / (1000 * 60));
               const cleanedTitle = removeAfterFirstEmoji(event.title);
               const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
-              const eventClass = getEventClass(cleanedTitle, duration); // Dynamic class assignment
-              // highlightWords.some(word => cleanedTitle.toLowerCase().includes(word))
-              //   ? "pink-event"
-              //   : duration < 15
-              //     ? "small-event"
-              //     : "yellow-event";
+              const eventClass = getEventClass(cleanedTitle, duration);
 
               return {
                 title: formattedTitle,
                 start: startDate,
                 end: endDate,
-                id: `${event.title}-${startDate.getTime()}`, // Unique ID fix
+                id: `${event.title}-${startDate.getTime()}`,
                 extendedProps: { duration },
                 className: eventClass
               };
             });
-            TimDate = parsedEvents[0].start
+            TimDate = parsedEvents[0].start;
             setEvents(parsedEvents);
-
           } else {
             console.error("Invalid API response format");
           }
         })
         .catch((err) => {
-          setLoading(false); // Stop loading on error
+          setLoading(false);
           console.error("Error fetching events:", err);
         });
+
     } else {
-      // Load from file
-      const fileMap = {
-        "Normal Day": "normalday.txt",
-        "Extra Class Day": "extraclassday.txt",
-        "Weekend": "weekend.txt",
-        "Saved to File": fetchFileContent
+      const apiMap = {
+        "Normal Day": "https://sharishth.pythonanywhere.com/get-file-content/?filename=normalday.txt",
+        "Extra Class Day": "https://sharishth.pythonanywhere.com/get-file-content/?filename=extraclassday.txt",
+        "Weekend": "https://sharishth.pythonanywhere.com/get-file-content/?filename=weekend.txt",
+        "File": "https://sharishth.pythonanywhere.com/get-file-content/?filename=events.txt"
+        // "Normal Day": "http://localhost:8000/get-file-content/?filename=normalday.txt",
+        // "Extra Class Day": "http://localhost:8000/get-file-content/?filename=extraclassday.txt",
+        // "Weekend": "http://localhost:8000/get-file-content/?filename=weekend.txt",
+        // "File": "http://localhost:8000/get-file-content/?filename=events.txt"
       };
 
-      const selectedFile = fileMap[viewMode];
-      if (viewMode === "Saved to File") {
-        fetchFileContentFromApi()
-      } else {
-        if (selectedFile) {
-          loadEventsFromFile(selectedFile);
-        }
+      const selectedUrl = apiMap[viewMode];
+      if (selectedUrl) {
+        fetchFileContentFromApi(selectedUrl);
+      }
+      else {
+        setLoading(false);
       }
     }
   }, [viewMode]);
 
 
-  const fetchFileContentFromApi = () => {
+  const fetchFileContentFromApi = async (url) => {
     setLoading(true); // Start loading before API call
     // return fetch("http://localhost:8000/get-file-content/")
-    return fetch("https://sharishth.pythonanywhere.com/get-file-content/")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch file content");
-        return res.text();
-      })
-      .then((text) => {
-        processEvents(text);
-        setLoading(false); // Stop loading after response
-      })
-      .catch((err) => {
-        console.error("Error fetching file content:", err);
-        return null;
-      });
+    try {
+      const res = await fetch(url);
+      
+      if (!res.ok) throw new Error("Failed to fetch file content");
+      const text = await res.text();
+      
+      processEvents(text);
+      setLoading(false); // Stop loading after response
+    } catch (err) {
+      console.error("Error fetching file content:", err);
+      return null;
+    }
   };
 
 
@@ -470,12 +463,13 @@ useEffect(() => {
         const startDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[0].trim())}`);
         const endDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[1].trim())}`);
         const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
-
+        
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
           console.error("Invalid date conversion:", { timeRange, startDate, endDate });
           return null;
         }
 
+        
         const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
 
         const eventClass = getEventClass(cleanedTitle, duration);
@@ -571,7 +565,6 @@ useEffect(() => {
       }
       return event;
     });
-    console.log("Updated events after resize:", updatedEvents);
     setEvents(updatedEvents);
   };
 
@@ -764,8 +757,8 @@ useEffect(() => {
         const eventTitle = removeLastParentheses(cleanEventTitle(event.id));
         return `${startTime} - ${endTime}= ${eventTitle}`;
       }).join("\n");
-      // const response = await fetch("http://localhost:8000/update-file-content/", {
-      const response = await fetch("https://sharishth.pythonanywhere.com/update-file-content/", {
+      // const response = await fetch("http://localhost:8000/update-file-content/?filename=events.txt", {
+      const response = await fetch("https://sharishth.pythonanywhere.com/update-file-content/?filename=events.txt", {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: fileContent
@@ -780,6 +773,44 @@ useEffect(() => {
     }
   };
 
+  const updateBackendContent = async (dayType) => {
+    
+    try {
+      if (dayType === "File" | dayType=== "Current Events") return; // Skip if view mode is "File"
+      setSavingEvent(true);
+
+      // Mapping day types to filenames
+      const filenameMap = {
+        "Weekend": "weekend.txt",
+        "Extra Class Day": "extraclassday.txt",
+        "Normal Day": "normalday.txt"
+      };
+
+      const filename = filenameMap[dayType];
+      if (!filename) throw new Error("Invalid day type");
+
+      const fileContent = events.map(event => {
+        const startTime = formatTime(event.start);
+        const endTime = formatTime(event.end);
+        const eventTitle = removeLastParentheses(cleanEventTitle(event.id));
+        return `${startTime} - ${endTime}= ${eventTitle}`;
+      }).join("\n");
+
+      // const response = await fetch(`http://localhost:8000/update-file-content/?filename=${filename}`, {
+        const response = await fetch(`http://sharishth.pythonanywhere.com/update-file-content/?filename=${filename}`, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: fileContent
+      });
+
+      setSavingEvent(false);
+      if (!response.ok) throw new Error("Failed to update file content");
+      setResponseMessage("Events saved successfully!");
+      setTimeout(() => setResponseMessage(""), 3000);
+    } catch (error) {
+      console.error("Error updating file content:", error);
+    }
+  };
 
 
   // Save updated events back to API
@@ -836,14 +867,14 @@ useEffect(() => {
               mode === "Normal Day" ? "ND" :
                 mode === "Extra Class Day" ? "ED" :
                   mode === "Weekend" ? "We" :
-                    mode === "Saved to File" ? "File" : mode}
+                    mode === "File" ? "File" : mode}
             onClick={() => setViewMode(mode)}
           >
             <i className={`fas ${mode === "Current Events" ? "fa-calendar-day" :
               mode === "Normal Day" ? "fa-calendar-check" :
                 mode === "Extra Class Day" ? "fa-book-open" :
                   mode === "Weekend" ? "fa-umbrella-beach" :
-                    mode === "Saved to File" ? "fa-file-alt" : "fa-calendar"} icon`}
+                    mode === "File" ? "fa-file-alt" : "fa-calendar"} icon`}
               style={{ marginRight: "8px" }}></i>
             <span>{mode}</span>
           </button>
@@ -856,11 +887,14 @@ useEffect(() => {
         <button onClick={saveEventsToFile} className="save-btn" data-short="">
           <i className="fas fa-upload"></i>
           <span className="button-text">Publish Events</span>
-
         </button>
         <button onClick={updateFileContent} className="copy-btn" data-short="">
           <i className="fas fa-copy"></i>
-          <span className="button-text">Copy Events</span>
+          <span className="button-text">Copy To File</span>
+        </button>
+        <button onClick={() => updateBackendContent(viewMode)} className="copy-btn" data-short="">
+          <i className="fas fa-sync"></i>
+          <span className="button-text">Sync</span>
         </button>
       </div>
 
@@ -927,7 +961,7 @@ useEffect(() => {
           const durationMs = arg.event.end.getTime() - arg.event.start.getTime();
           const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
           const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-
+          
           let durationFormatted = "";
           if (durationHours > 0) durationFormatted += `${durationHours}h`;
           if (durationMinutes > 0) durationFormatted += ` ${durationMinutes}m`;
