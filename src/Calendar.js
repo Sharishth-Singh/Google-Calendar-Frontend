@@ -905,7 +905,7 @@ const weekday = date.toLocaleString('default', { weekday: 'long' });
           </button>
         ))}
 
-      {/* <div className="button-container"> */}
+      <div className="button-container">
         <button onClick={saveEventsToFile} className="save-btn" data-short="">
           <i className="fas fa-upload" style={{marginRight: "8px"}}></i>
           <span className="button-text">Publish Events</span>
@@ -918,7 +918,7 @@ const weekday = date.toLocaleString('default', { weekday: 'long' });
           <i className="fas fa-sync"style={{marginRight: "8px"}}></i>
           <span className="button-text">Sync</span>
         </button>
-      {/* </div> */}
+      </div>
       </div>
 
 
