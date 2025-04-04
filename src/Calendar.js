@@ -873,17 +873,18 @@ const Calendar = () => {
     }
   }
 
-const date = new Date();
-const day = date.getDate();
-const month = date.toLocaleString('default', { month: 'long' });
-const weekday = date.toLocaleString('default', { weekday: 'long' });
+  const date = new Date();
+  date.setDate(date.getDate() + 1); // adds one day
+  const day = date.getDate();
+  const month = date.toLocaleString('default', { month: 'long' });
+  const weekday = date.toLocaleString('default', { weekday: 'long' });
 
   return (
     <div className="calendar-container">
       {/* Navigation Bar */}
       <div className="navbar">
 
-        <div className="dateClass">{day} {month} {weekday}</div>
+        <div className="dateClass">{day} {month} {weekday} <span style={{fontSize: "10px"}}>   ...What are you planning?? <b style={{fontSize:"15px", margin: "10px"}}> MAKE IT COUNT</b></span></div>
         {viewModes.map(mode => (
           <button
             key={mode}
@@ -905,20 +906,20 @@ const weekday = date.toLocaleString('default', { weekday: 'long' });
           </button>
         ))}
 
-      <div className="button-container">
-        <button onClick={saveEventsToFile} className="save-btn" data-short="">
-          <i className="fas fa-upload" style={{marginRight: "8px"}}></i>
-          <span className="button-text">Publish Events</span>
-        </button>
-        <button onClick={updateFileContent} className="copy-btn" data-short="">
-          <i className="fas fa-copy"style={{marginRight: "8px"}}></i>
-          <span className="button-text">Copy To File</span>
-        </button>
-        <button onClick={() => updateBackendContent(viewMode)} className="copy-btn" data-short="">
-          <i className="fas fa-sync"style={{marginRight: "8px"}}></i>
-          <span className="button-text">Sync</span>
-        </button>
-      </div>
+        <div className="button-container">
+          <button onClick={saveEventsToFile} className="save-btn" data-short="">
+            <i className="fas fa-upload" style={{ marginRight: "8px" }}></i>
+            <span className="button-text">Publish Events</span>
+          </button>
+          <button onClick={updateFileContent} className="copy-btn" data-short="">
+            <i className="fas fa-copy" style={{ marginRight: "8px" }}></i>
+            <span className="button-text">Copy To File</span>
+          </button>
+          <button onClick={() => updateBackendContent(viewMode)} className="copy-btn" data-short="">
+            <i className="fas fa-sync" style={{ marginRight: "8px" }}></i>
+            <span className="button-text">Sync</span>
+          </button>
+        </div>
       </div>
 
 
@@ -986,8 +987,8 @@ const weekday = date.toLocaleString('default', { weekday: 'long' });
         //   center: '',
         //   right: ''
         // }}
-headerToolbar={false}
-// hiddenDays={[0, 6]}
+        headerToolbar={false}
+        // hiddenDays={[0, 6]}
         /* Custom event content */
         eventContent={(arg) => {
           const cleanedTitle = arg.event.title.replace(/^\d{1,2}:\d{2} [APMapm]{2} - \d{1,2}:\d{2} [APMapm]{2} \|\s*/, "");
