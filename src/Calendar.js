@@ -797,7 +797,7 @@ const Calendar = () => {
       }).join("\n");
 
       // const response = await fetch(`http://localhost:8000/update-file-content/?filename=${filename}`, {
-        const response = await fetch(`http://sharishth.pythonanywhere.com/update-file-content/?filename=${filename}`, {
+        const response = await fetch(`https://sharishth.pythonanywhere.com/update-file-content/?filename=${filename}`, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: fileContent
