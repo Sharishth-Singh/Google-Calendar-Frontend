@@ -1,7 +1,7 @@
 
 
 body {
-  margin: 0;
+  margin: 5px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -145,15 +145,40 @@ button {
   .button-text {
     display: none !important;
   }
+  .spaceUp{
+    height: 100px !important;
+  }
 }
-
+.fc-col-header-cell {
+  display: none;
+}
 /* Navbar buttons */
 .navbar {
+  position: fixed;
+  width: 100%;
   padding: 10px;
   display: flex;
+  /* display: none; */
   justify-content: center;
   gap: 12px;
   margin-bottom: 15px;
+  background-color: black !important;
+  z-index: 800;
+}
+.spaceUp{
+  height: 50px
+}
+
+.dateClass{
+  font-size: 25px;
+  color: white;
+  font-weight: bold;
+  margin-left: 10px;
+  text-align: left;
+  /* background-color: red; */
+  position: relative;
+  right: 93px;
+  font-family: 'Georgia', serif;
 }
 
 .navbar button {
@@ -165,17 +190,20 @@ button {
 .navbar button:hover {
   background-color: #007bff;
   color: white;
-  font-weight: bold;
+  /* font-weight: bold; */
 }
 
 /* --- BUTTON CONTAINER --- */
 .button-container {
-  display: flex;
+  position: fixed;
+  z-index: 1000;
+  /* width: 100%; */
+  /* display: flex; */
   justify-content: flex-end; /* Aligns content to the right */
   gap: 10px;
-  position: absolute;
+  /* position: absolute; */
   right: 10px;
-  top: 67px;
+  /* top: 67px; */
 }
 
 .button-container button i {
@@ -313,4 +341,48 @@ button {
 .response-message.error {
   background-color: #F44336;
   color: white;
+}
+
+
+.alert {
+  display: flex;
+  align-items: center;
+  padding: 0px 10px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+  width: 300px; /* Adjust width as needed */
+  position: fixed;
+  top: 10px;
+  left: 20px;
+  z-index: 1000; /* Ensures it stays on top */
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.icon {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+}
+
+.alert-success {
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #842029;
+  font-size: 25px;
+  cursor: pointer;
+  margin-left: 10px;
+  position: relative;
+  top: 4px
 }

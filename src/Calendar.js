@@ -4,6 +4,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import "./index.css"; // Import CSS file
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { set } from "date-fns";
 
 const highlightWords = [
   "break", "dinner", "good morning", "your journey", "lunch", "relaxation",
@@ -775,7 +776,7 @@ const Calendar = () => {
       setSavingEvent(false);
       if (!response.ok) throw new Error("Failed to update file content");
       setResponseMessage("Events saved successfully!");
-      setTimeout(() => setResponseMessage(""), 3000);
+      // setTimeout(() => setResponseMessage(""), 3000);
     } catch (error) {
       console.error("Error updating file content:", error);
     }
@@ -814,7 +815,7 @@ const Calendar = () => {
       setSavingEvent(false);
       if (!response.ok) throw new Error("Failed to update file content");
       setResponseMessage("Events saved successfully!");
-      setTimeout(() => setResponseMessage(""), 3000);
+      // setTimeout(() => setResponseMessage(""), 3000);
     } catch (error) {
       console.error("Error updating file content:", error);
     }
@@ -854,7 +855,7 @@ const Calendar = () => {
       .then((data) => {
         setSavingEvent(false);
         setResponseMessage("Events saved successfully!");
-        setTimeout(() => setResponseMessage(""), 3000);
+        // setTimeout(() => setResponseMessage(""), 3000);
       })
       .catch((error) => {
         setSavingEvent(false);
@@ -863,10 +864,26 @@ const Calendar = () => {
       });
   };
 
+  const dismissAlert = () => {
+    const alertBox = document.getElementById("alertBox");
+    if (alertBox) {
+      alertBox.style.opacity = "0"
+      setTimeout(() => alertBox.style.display = "none", 500);
+      setResponseMessage("");
+    }
+  }
+
+const date = new Date();
+const day = date.getDate();
+const month = date.toLocaleString('default', { month: 'long' });
+const weekday = date.toLocaleString('default', { weekday: 'long' });
+
   return (
     <div className="calendar-container">
       {/* Navigation Bar */}
       <div className="navbar">
+
+        <div className="dateClass">{day} {month} {weekday}</div>
         {viewModes.map(mode => (
           <button
             key={mode}
@@ -887,24 +904,25 @@ const Calendar = () => {
             <span>{mode}</span>
           </button>
         ))}
+
+      {/* <div className="button-container"> */}
+        <button onClick={saveEventsToFile} className="save-btn" data-short="">
+          <i className="fas fa-upload" style={{marginRight: "8px"}}></i>
+          <span className="button-text">Publish Events</span>
+        </button>
+        <button onClick={updateFileContent} className="copy-btn" data-short="">
+          <i className="fas fa-copy"style={{marginRight: "8px"}}></i>
+          <span className="button-text">Copy To File</span>
+        </button>
+        <button onClick={() => updateBackendContent(viewMode)} className="copy-btn" data-short="">
+          <i className="fas fa-sync"style={{marginRight: "8px"}}></i>
+          <span className="button-text">Sync</span>
+        </button>
+      {/* </div> */}
       </div>
 
 
       {/* Button Container */}
-      <div className="button-container">
-        <button onClick={saveEventsToFile} className="save-btn" data-short="">
-          <i className="fas fa-upload"></i>
-          <span className="button-text">Publish Events</span>
-        </button>
-        <button onClick={updateFileContent} className="copy-btn" data-short="">
-          <i className="fas fa-copy"></i>
-          <span className="button-text">Copy To File</span>
-        </button>
-        <button onClick={() => updateBackendContent(viewMode)} className="copy-btn" data-short="">
-          <i className="fas fa-sync"></i>
-          <span className="button-text">Sync</span>
-        </button>
-      </div>
 
 
 
@@ -932,11 +950,14 @@ const Calendar = () => {
 
       {/* Response Message */}
       {responseMessage && (
-        <div className={`response-message ${responseMessage.includes('successfully') ? 'success' : 'error'}`}>
+        <div id="alertBox" className={`response-message ${responseMessage.includes('successfully') ? 'alert alert-success' : 'alert alert-danger'}`}>
+          <span className="icon">{`${responseMessage.includes('successfully') ? '✅' : '⚠️'}`}</span>
+          <span className="icon-container"></span>
           <p>{responseMessage}</p>
+          <button className="close-btn" onClick={dismissAlert}>×</button>
         </div>
       )}
-
+      <p className="spaceUp"></p>
       {/* FullCalendar Component */}
       <FullCalendar
         plugins={[timeGridPlugin, interactionPlugin]}
@@ -960,12 +981,13 @@ const Calendar = () => {
         snapDuration="00:05:00"
 
         /* Hide "Today" button */
-        headerToolbar={{
-          left: 'title',
-          center: '',
-          right: ''
-        }}
-
+        // headerToolbar={{
+        //   left: 'title',
+        //   center: '',
+        //   right: ''
+        // }}
+headerToolbar={false}
+// hiddenDays={[0, 6]}
         /* Custom event content */
         eventContent={(arg) => {
           const cleanedTitle = arg.event.title.replace(/^\d{1,2}:\d{2} [APMapm]{2} - \d{1,2}:\d{2} [APMapm]{2} \|\s*/, "");
