@@ -414,10 +414,10 @@ const Calendar = () => {
     // return fetch("http://localhost:8000/get-file-content/")
     try {
       const res = await fetch(url);
-      
+
       if (!res.ok) throw new Error("Failed to fetch file content");
       const text = await res.text();
-      
+
       processEvents(text);
       setLoading(false); // Stop loading after response
     } catch (err) {
@@ -463,13 +463,13 @@ const Calendar = () => {
         const startDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[0].trim())}`);
         const endDate = new Date(`${currentDate}T${convertTo24Hour(timeParts[1].trim())}`);
         const duration = Math.round((endDate - startDate) / (1000 * 60)); // Duration in minutes
-        
+
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
           console.error("Invalid date conversion:", { timeRange, startDate, endDate });
           return null;
         }
 
-        
+
         const formattedTitle = `${formatTime(startDate)} - ${formatTime(endDate)} | ${cleanedTitle} (${formatDuration(duration)})`;
 
         const eventClass = getEventClass(cleanedTitle, duration);
@@ -537,8 +537,16 @@ const Calendar = () => {
   const handleEventChange = (eventChangeInfo) => {
     const updatedEvents = events.map(event => {
       if (event.id === eventChangeInfo.event.id) {
-        const start = eventChangeInfo.event.start;
-        const end = eventChangeInfo.event.end;
+
+        let start = eventChangeInfo.event.start;
+        let end = eventChangeInfo.event.end;
+
+
+        if (start.getDate() !== end.getDate()) {
+          let newStart = new Date(end);
+          newStart.setHours(0, 0, 0, 0);
+          start = newStart;
+        }
         const duration = Math.round((end - start) / (1000 * 60)); // Convert ms to minutes
 
         const formattedTitle = `${formatTime(start)} - ${formatTime(end)} | ${removeLastParentheses(cleanEventTitle(event.id))} (${formatDuration(duration)})`;
@@ -774,9 +782,9 @@ const Calendar = () => {
   };
 
   const updateBackendContent = async (dayType) => {
-    
+
     try {
-      if (dayType === "File" | dayType=== "Current Events") return; // Skip if view mode is "File"
+      if (dayType === "File" | dayType === "Current Events") return; // Skip if view mode is "File"
       setSavingEvent(true);
 
       // Mapping day types to filenames
@@ -797,7 +805,7 @@ const Calendar = () => {
       }).join("\n");
 
       // const response = await fetch(`http://localhost:8000/update-file-content/?filename=${filename}`, {
-        const response = await fetch(`https://sharishth.pythonanywhere.com/update-file-content/?filename=${filename}`, {
+      const response = await fetch(`https://sharishth.pythonanywhere.com/update-file-content/?filename=${filename}`, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: fileContent
@@ -941,6 +949,9 @@ const Calendar = () => {
         eventDrop={handleEventChange}
         eventResize={handleEventResize}
         eventClick={handleEventClick}
+        eventDurationEditable={true}
+        eventStartEditable={true}
+        allDaySlot={false}
         contentHeight="auto"
         selectable={true}
         select={handleDateSelect}
@@ -961,11 +972,12 @@ const Calendar = () => {
           const durationMs = arg.event.end.getTime() - arg.event.start.getTime();
           const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
           const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-          
+
           let durationFormatted = "";
           if (durationHours > 0) durationFormatted += `${durationHours}h`;
           if (durationMinutes > 0) durationFormatted += ` ${durationMinutes}m`;
           if (durationFormatted) durationFormatted = `(${durationFormatted.trim()})`;
+          // console.log(arg.event.start.toLocaleDateString(),arg.event.end.getDate());
 
           return (
             <div style={{
