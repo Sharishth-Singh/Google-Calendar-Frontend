@@ -884,7 +884,13 @@ const Calendar = () => {
       {/* Navigation Bar */}
       <div className="navbar">
 
-        <div className="dateClass">{day} {month} {weekday} <span style={{fontSize: "10px"}}>   ...What are you planning?? <b style={{fontSize:"15px", margin: "10px"}}> MAKE IT COUNT</b></span></div>
+        <div className="dateClass">
+          <span style={{position: "relative", top: "3px", marginRight: "5px"}}>{day}</span>
+          <span style={{position: "relative", bottom: "4px"}}>{month}</span>
+          <span style={{fontSize: "30px", margin: "4px"}}>|</span>
+          <span style={{color: "pink", marginRight: "8px"}}>{weekday}</span>
+          <i><span style={{fontSize: "12px", fontFamily: "'Comic Sans MS', cursive, sans-serif"}}> ...What are you planning NEXT??</span></i>
+        </div>
         {viewModes.map(mode => (
           <button
             key={mode}
