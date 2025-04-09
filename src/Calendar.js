@@ -543,22 +543,16 @@ const Calendar = () => {
         let end = eventChangeInfo.event.end;
 
         // if morning event and date are not equal, set start to 00:00:00 of the same day
-if (start.getDate() !== end.getDate() && start.getHours() > 20 && end.getHours() < 3) {
-  console.log("end", start, end);
-  
-  // Shift end to end of start day (23:59:59.999)
-  let newEnd = new Date(start);
-  newEnd.setHours(23, 59, 59, 999);
-  end = newEnd;
-}
-
-if (start.getDate() !== end.getDate() && end.getHours() < 8 && start.getHours() > 12) {
-  console.log("start", start, end);
-  // Shift start to beginning of end day (00:00)
-  let newStart = new Date(end);
-  newStart.setHours(0, 0, 0, 0);
-  start = newStart;
-}
+        if(end.getDate() == new Date().getDate()+2){ // evening event
+          let newEnd = new Date(start);
+          newEnd.setHours(23, 59, 59, 999);
+          end = newEnd;
+        }
+        else if(start.getDate() == new Date().getDate()){ // morning event
+          let newStart = new Date(end);
+          newStart.setHours(0, 0, 0, 0);
+          start = newStart;
+        }
 
         const duration = Math.round((end - start) / (1000 * 60)); // Convert ms to minutes
 
