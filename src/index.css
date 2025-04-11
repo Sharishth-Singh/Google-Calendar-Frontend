@@ -24,6 +24,14 @@ body {
   color: black;
 }
 
+.calendar-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  /* padding: 10px; */
+  overflow-y: scroll;
+}
+
 /* Individual event styles */
 .fc .pink-event {
   background-color: pink !important;

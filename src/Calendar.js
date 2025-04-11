@@ -4,7 +4,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import "./index.css"; // Import CSS file
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { set } from "date-fns";
+import TodoList from "./Todo"
 
 const highlightWords = [
   "break", "dinner", "good morning", "your journey", "lunch", "relaxation",
@@ -543,12 +543,12 @@ const Calendar = () => {
         let end = eventChangeInfo.event.end;
 
         // if morning event and date are not equal, set start to 00:00:00 of the same day
-        if(end.getDate() == new Date().getDate()+2){ // evening event
+        if (end.getDate() == new Date().getDate() + 2) { // evening event
           let newEnd = new Date(start);
           newEnd.setHours(23, 59, 59, 999);
           end = newEnd;
         }
-        else if(start.getDate() == new Date().getDate()){ // morning event
+        else if (start.getDate() == new Date().getDate()) { // morning event
           let newStart = new Date(end);
           newStart.setHours(0, 0, 0, 0);
           start = newStart;
@@ -887,15 +887,17 @@ const Calendar = () => {
 
   return (
     <div className="calendar-container">
+      <TodoList />
+
       {/* Navigation Bar */}
       <div className="navbar">
 
         <div className="dateClass">
-          <span style={{position: "relative", top: "3px", marginRight: "5px"}}>{day}</span>
-          <span style={{position: "relative", bottom: "4px"}}>{month}</span>
-          <span style={{fontSize: "30px", margin: "4px"}}>|</span>
-          <span style={{color: "pink", marginRight: "8px"}}>{weekday}</span>
-          <i><span style={{fontSize: "12px", fontFamily: "'Comic Sans MS', cursive, sans-serif"}}> ...What are you planning NEXT??</span></i>
+          <span style={{ position: "relative", top: "3px", marginRight: "5px" }}>{day}</span>
+          <span style={{ position: "relative", bottom: "4px" }}>{month}</span>
+          <span style={{ fontSize: "30px", margin: "4px" }}>|</span>
+          <span style={{ color: "pink", marginRight: "8px" }}>{weekday}</span>
+          <i><span style={{ fontSize: "12px", fontFamily: "'Comic Sans MS', cursive, sans-serif" }}> ...What are you planning NEXT??</span></i>
         </div>
         {viewModes.map(mode => (
           <button
@@ -970,67 +972,69 @@ const Calendar = () => {
           <button className="close-btn" onClick={dismissAlert}>×</button>
         </div>
       )}
-      <p className="spaceUp"></p>
       {/* FullCalendar Component */}
-      <FullCalendar
-        plugins={[timeGridPlugin, interactionPlugin]}
-        initialDate={TimDate}
-        initialView="timeGridDay"
-        events={events}
-        slotMinTime="00:00:00"
-        slotMaxTime="24:00:00"
-        editable={true}
-        eventDrop={handleEventChange}
-        eventResize={handleEventResize}
-        eventClick={handleEventClick}
-        eventDurationEditable={true}
-        eventStartEditable={true}
-        allDaySlot={false}
-        contentHeight="auto"
-        selectable={true}
-        select={handleDateSelect}
-        eventTextColor="black"
-        height="auto"
-        snapDuration="00:05:00"
+      <div>
+        <p className="spaceUp"></p>
+        <FullCalendar
+          plugins={[timeGridPlugin, interactionPlugin]}
+          initialDate={TimDate}
+          initialView="timeGridDay"
+          events={events}
+          slotMinTime="00:00:00"
+          slotMaxTime="24:00:00"
+          editable={true}
+          eventDrop={handleEventChange}
+          eventResize={handleEventResize}
+          eventClick={handleEventClick}
+          eventDurationEditable={true}
+          eventStartEditable={true}
+          allDaySlot={false}
+          contentHeight="auto"
+          selectable={true}
+          select={handleDateSelect}
+          eventTextColor="black"
+          height="auto"
+          snapDuration="00:05:00"
 
-        /* Hide "Today" button */
-        // headerToolbar={{
-        //   left: 'title',
-        //   center: '',
-        //   right: ''
-        // }}
-        headerToolbar={false}
-        // hiddenDays={[0, 6]}
-        /* Custom event content */
-        eventContent={(arg) => {
-          const cleanedTitle = arg.event.title.replace(/^\d{1,2}:\d{2} [APMapm]{2} - \d{1,2}:\d{2} [APMapm]{2} \|\s*/, "");
-          const durationMs = arg.event.end.getTime() - arg.event.start.getTime();
-          const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
-          const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+          /* Hide "Today" button */
+          // headerToolbar={{
+          //   left: 'title',
+          //   center: '',
+          //   right: ''
+          // }}
+          headerToolbar={false}
+          // hiddenDays={[0, 6]}
+          /* Custom event content */
+          eventContent={(arg) => {
+            const cleanedTitle = arg.event.title.replace(/^\d{1,2}:\d{2} [APMapm]{2} - \d{1,2}:\d{2} [APMapm]{2} \|\s*/, "");
+            const durationMs = arg.event.end.getTime() - arg.event.start.getTime();
+            const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+            const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
 
-          let durationFormatted = "";
-          if (durationHours > 0) durationFormatted += `${durationHours}h`;
-          if (durationMinutes > 0) durationFormatted += ` ${durationMinutes}m`;
-          if (durationFormatted) durationFormatted = `(${durationFormatted.trim()})`;
-          // console.log(arg.event.start.toLocaleDateString(),arg.event.end.getDate());
+            let durationFormatted = "";
+            if (durationHours > 0) durationFormatted += `${durationHours}h`;
+            if (durationMinutes > 0) durationFormatted += ` ${durationMinutes}m`;
+            if (durationFormatted) durationFormatted = `(${durationFormatted.trim()})`;
+            // console.log(arg.event.start.toLocaleDateString(),arg.event.end.getDate());
 
-          return (
-            <div style={{
-              borderRadius: "7px"
-            }}>
-              {arg.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {arg.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} | <b>{cleanEventTitle(cleanedTitle)}</b>  {durationFormatted}
-            </div>
+            return (
+              <div style={{
+                borderRadius: "7px"
+              }}>
+                {arg.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {arg.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} | <b>{cleanEventTitle(cleanedTitle)}</b>  {durationFormatted}
+              </div>
 
-          );
-        }}
-        eventDidMount={(info) => {
-          info.el.oncontextmenu = (e) => {
-            e.preventDefault();
-            handleEventDelete(info);
-          };
-        }}
+            );
+          }}
+          eventDidMount={(info) => {
+            info.el.oncontextmenu = (e) => {
+              e.preventDefault();
+              handleEventDelete(info);
+            };
+          }}
 
-      />
+        />
+      </div>
     </div>
   );
 
